@@ -9,11 +9,9 @@ from google.cloud import storage
 
 # Constants
 GITHUB_API_URL = "https://api.github.com/search/repositories?q=manim"
-GCS_BUCKET_NAME = "hisolver-data-collection"
+GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
 PER_PAGE = 100
 GITHUB_TOKEN = os.environ.get("GITHUB_PAT")
-if not GITHUB_TOKEN:
-    raise ValueError("Environment variable 'GITHUB_PAT' not set")
 HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}"
 }

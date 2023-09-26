@@ -18,21 +18,22 @@
 2. From the sidebar, select `Cloud Storage` -> `Buckets`
 3. Make sure to select the project you just created a service account for
 4. On the `Buckets` page, click `Create`
-5. Name the bucket `hisolver-data-collection`
+5. Name the bucket `hisolver-data-collection`; if the name's taken, just add a `-1` or something
 6. Use default settings
 7. Finish creating the bucket
-8. Go back to `Service Accounts` page, open up the service account you just created (you named it `hisolver-data-collection`)
-9. Under the `DETAILS` tab, find the service account's email. It should look something like `hisolver-data-collection@[your-project-name].iam.gserviceaccount.com`. Copy the email.
-10. Go back to `Buckets` page, find the bucket you just created (you named it `hisolver-data-collection`)
-11. Go to the `PERMISSIONS` tab
-12. Select `VIEW BY PRINCIPALS` -> `GRANT ACCESS`
-13. Paste the service account email you just copied to the `New principals` field
-14. In the `Assign roles` section, select a role `Cloud Storage` -> `Storage Admin`. This should give your service account full access to the bucket.
+8. Copy the name of your bucket and paste it in a file called `gcs_bucket_name.txt`; the file should live in the previous `secrets` folder; make sure the file exists within this path of the repo: `src/collection/secrets/gcs_bucket_name.txt`
+9. Go back to `Service Accounts` page, open up the service account you just created (you named it `hisolver-data-collection`)
+10. Under the `DETAILS` tab, find the service account's email. It should look something like `hisolver-data-collection@[your-project-name].iam.gserviceaccount.com`. Copy the email.
+11. Go back to `Buckets` page, find the bucket you just created (you named it `hisolver-data-collection`)
+12. Go to the `PERMISSIONS` tab
+13. Select `VIEW BY PRINCIPALS` -> `GRANT ACCESS`
+14. Paste the service account email you just copied to the `New principals` field
+15. In the `Assign roles` section, select a role `Cloud Storage` -> `Storage Admin`. This should give your service account full access to the bucket.
 
 ## III. Set up a GitHub Personal Access Token (PAT) [One time]
 
-1. Go to the settings page, look for `Developer settings` on the sidebar
-2. Select `Personal access tokens` -> `Tokens (classic)`
+1. Go to your settings page of [GitHub](https://github.com), look for `Developer settings` on the sidebar
+2. Select `Personal access tokens` -> `Tokens (classic)` (following this link should also bring you to this page: https://github.com/settings/tokens)
 3. Select `Generate new token` -> `Generate new token (classic)`
 4. Give it any name; set expiration to "No expiration"; generate token
 5. Make sure to copy the token string immediately; this is the only time you'll see it
@@ -56,4 +57,8 @@
 
 5. Run collection script in container
 
-`docker run -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json -e GITHUB_PAT=$(cat secrets/pat.txt) github-scraper`
+`docker run -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json -e GITHUB_PAT=$(cat secrets/pat.txt) github-scraper -e GCS_BUCKET_NAME=$(cat secrets/gcs_bucket_name.txt)`
+
+6. The collection script should be running; if you go to your bucket page again on GCP, you should see the bucket being populated with scraped python files
+
+7. In case you need to rebuild the container, just rerun steps 2-4
