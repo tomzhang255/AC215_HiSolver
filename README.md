@@ -1,10 +1,9 @@
-AC215-Template (Milestone2)
-==============================
+# AC215_HiSolver (Milestone2)
 
 AC215 - Milestone2
 
-Project Organization
-------------
+## Project Organization
+
       ├── LICENSE
       ├── README.md
       ├── notebooks
@@ -12,60 +11,64 @@ Project Organization
       ├── requirements.txt
       ├── setup.py
       └── src
-            ├── preprocessing
-            │   ├── Dockerfile
-            │   ├── preprocess.py
-            │   └── requirements.txt
-            └── validation
+            ├── collection
+            │     ├── README.md
+            │     ├── Dockerfile
+            │     ├── preprocess.py
+            │     └── requirements.txt
+            |── preprocessing
+            |     ├── README.md
+            |     ├── Dockerfile
+            |     ├── preprocessing.py
+            |     └── requirements.txt
+            |── training
+            |     ├── README.md
+            |     ├── Dockerfile
+            |     ├── training.py
+            |     └── requirements.txt
+            └── deployment
+                  ├── README.md
                   ├── Dockerfile
-                  ├── cv_val.py
+                  ├── deployment.py
                   └── requirements.txt
 
+---
 
---------
-# AC215 - Milestone2 - ButterFlyer
+## AC215 - Milestone2 - HiSolver
+
+### Project Intro
 
 **Team Members**
-Pavlov Protovief, Paolo Primopadre and Pablo El Padron
+Yan Kaled, Tom Zhang, Tadhg Looram, Mina Lee, Jason Xiang, Nishtha Sardana & Kareema Batool
 
 **Group Name**
-Awesome Group
+HiSolver
 
 **Project**
-In this project we aim to develop an application that can identify various species of butterflies in the wild using computer vision and offer educational content through a chatbot interface.
+In this project, we are fine-tuning an LLM for an animation engine (specifically Python package Manim). The goal is to develop an AI application powered by an LLM that can receive user input in the form of raw text consisting of mathematical problems at the SAT level. The application should provide step-by-step solutions or hints for the student - as well as generate Python code for the animation engine. One major challenge would be to construct and fine-tune the said LLM.
 
-### Milestone2 ###
+### Milestone2
 
-We gathered dataset of 1M butterflies representing 17K species. Our dataset comes from following sources - (1),(2),(3) with approx 100GB in size. We parked our dataset in a private Google Cloud Bucket. 
+Our proposed data pipeline has 4 major steps: data collection, data pre-processing, LLM fine-tuning, and model deployment. For this milestone, we will be solely focusing on the first two components.
 
-**Preprocess container**
-- This container reads 100GB of data and resizes the image sizes and stores it back to GCP
-- Input to this container is source and destincation GCS location, parameters for resizing, secrets needed - via docker
-- Output from this container stored at GCS location
+#### Data Collection
 
-(1) `src/preprocessing/preprocess.py`  - Here we do preprocessing on our dataset of 100GB, we reduce the image sizes (a parameter that can be changed later) to 128x128 for faster iteration with our process. Now we have dataset at 10GB and saved on GCS. 
+See [`src/collection/README.md`](src/collection/README.md) for an in-depth description of how to set up this component of the pipeline.
 
-(2) `src/preprocessing/requirements.txt` - We used following packages to help us preprocess here - `special butterfly package` 
+At this stage, we are using a container to run a python script that scrapes data from GitHub API. The scraper looks for all GitHub repositories containing the keyword "manim" (the animation engine Python package). For each repository, we collect all the Python files, then store them in a Google Cloud Storage (GCS) Bucket.
 
-(3) `src/preprocessing/Dockerfile` - This dockerfile starts with  `python:3.8-slim-buster`. This <statement> attaches volume to the docker container and also uses secrets (not to be stored on GitHub) to connect to GCS.
+As of 09/26/2023, there are approximately 2,400 such repositories of interest. It takes approximately 1 second to collect and upload 2 Python files to the GCS bucket.
 
-To run Dockerfile - `Instructions here`
+#### Data Pre-processing
 
-**Cross validation, Data Versioning**
-- This container reads preprocessed dataset and creates validation split and uses dvc for versioning.
-- Input to this container is source GCS location, parameters if any, secrets needed - via docker
-- Output is flat file with cross validation splits
-  
-(1) `src/validation/cv_val.py` - Since our dataset is quite large we decided to stratify based on species and kept 80% for training and 20% for validation. Our metrics will be monitored on this 20% validation set. 
+See [`src/preprocessing/README.md`](src/preprocessing/README.md) for an in-depth description of how to set up this component of the pipeline.
 
-(2) `requirements.txt` - We used following packages to help us with cross validation here - `iterative-stratification` 
+Note that not all Python files we collected from the last step are relevant. We are only interested in those that contain code examples of actually using the Manim package. So at this step, we will first be filtering for relevant Python files by looking for appropriate import statements. Then we perform standard text preprocessing procedures for NLP such as tokenization, encoding, etc.
 
-(3) `src/validation/Dockerfile` - This dockerfile starts with  `python:3.8-slim-buster`. This <statement> attaches volume to the docker container and also uses secrets (not to be stored on GitHub) to connect to GCS.
+#### LLM Fine-tuning
 
-To run Dockerfile - `Instructions here`
+For a future milestone.
 
-**Notebooks** 
-This folder contains code that is not part of container - for e.g: EDA, any 🔍 🕵️‍♀️ 🕵️‍♂️ crucial insights, reports or visualizations. 
+#### Model Deployment
 
-----
-You may adjust this template as appropriate for your project.
+Also for a future milestone.
