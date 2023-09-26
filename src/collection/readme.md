@@ -57,7 +57,7 @@
 
 5. Run collection script in container
 
-`docker run -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json -e GITHUB_PAT=$(cat secrets/pat.txt) github-scraper -e GCS_BUCKET_NAME=$(cat secrets/gcs_bucket_name.txt)`
+`docker run -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json -e GITHUB_PAT=$(cat secrets/pat.txt) -e GCS_BUCKET_NAME=$(cat secrets/gcs_bucket_name.txt) github-scraper`
 
 6. The collection script should be running; if you go to your bucket page again on GCP, you should see the bucket being populated with scraped python files
 
