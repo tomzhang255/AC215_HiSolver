@@ -52,7 +52,7 @@ def save_to_gcs(file_url, file_path, bucket_name):
     # file name to upload to bucket
     parts = file_url.split("/")
     # -5 is account name, -4 is repo name
-    file_name = f"{parts[-5]}/{parts[-4]}/{file_path}.py"
+    file_name = f"{parts[-5]}/{parts[-4]}/{file_path}"
 
     # upload to bucket
     blob = storage.Blob(file_name, storage.Client().get_bucket(bucket_name))
