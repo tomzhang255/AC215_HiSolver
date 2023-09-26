@@ -23,6 +23,6 @@ RUN python -m nltk.downloader punkt
 WORKDIR /app
 
 # Copy the preprocess script
-COPY preprocess.py /app/preprocess.py
+COPY preprocessing.py /app/preprocessing.py
 
-CMD ["python", "/app/preprocess.py"]
+CMD ["python", "/app/preprocessing.py"]

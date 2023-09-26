@@ -51,8 +51,9 @@ def save_to_gcs(file_url, file_path, bucket_name):
 
     # file name to upload to bucket
     parts = file_url.split("/")
+    # store everything in the raw/ folder
     # -5 is account name, -4 is repo name
-    file_name = f"{parts[-5]}/{parts[-4]}/{file_path}"
+    file_name = f"raw/{parts[-5]}/{parts[-4]}/{file_path}"
 
     # upload to bucket
     blob = storage.Blob(file_name, storage.Client().get_bucket(bucket_name))

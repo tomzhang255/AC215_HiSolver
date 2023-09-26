@@ -45,19 +45,19 @@
 
 2. Remove all containers built from this image if such containers exist
 
-`docker ps -a --filter "ancestor=github-scraper" -q | xargs docker stop && docker ps -a --filter "ancestor=github-scraper" -q | xargs docker rm`
+`docker ps -a --filter "ancestor=hisolver-manim-collection" -q | xargs docker stop && docker ps -a --filter "ancestor=hisolver-manim-collection" -q | xargs docker rm`
 
 3. Remove image if it exists
 
-`docker images | grep -q "github-scraper" && docker rmi github-scraper`
+`docker images | grep -q "hisolver-manim-collection" && docker rmi hisolver-manim-collection`
 
 4. Build docker image
 
-`docker build -t github-scraper .`
+`docker build -t hisolver-manim-collection .`
 
 5. Run collection script in container
 
-`docker run -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json -e GITHUB_PAT=$(cat secrets/pat.txt) -e GCS_BUCKET_NAME=$(cat secrets/gcs_bucket_name.txt) github-scraper`
+`docker run -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json -e GITHUB_PAT=$(cat secrets/pat.txt) -e GCS_BUCKET_NAME=$(cat secrets/gcs_bucket_name.txt) hisolver-manim-collection`
 
 6. The collection script should be running; if you go to your bucket page again on GCP, you should see the bucket being populated with scraped python files
 

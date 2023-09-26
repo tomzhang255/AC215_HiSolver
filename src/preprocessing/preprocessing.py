@@ -1,17 +1,20 @@
+import os
 import re
 import json
 from collections import defaultdict
 from nltk.tokenize import word_tokenize
 from google.cloud import storage
 
-GCS_BUCKET_NAME = "hisolver-data-collection-1"
+
+GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
 MAX_FILES = 20  # The maximum number of files allowed in a folder.
 
 
 def get_python_files_from_gcs(bucket_name):
     client = storage.Client()
     bucket = client.get_bucket(bucket_name)
-    blobs = list(bucket.list_blobs())  # Convert iterator to list here
+    # get all raw files
+    blobs = list(bucket.list_blobs(prefix='raw/'))  # Convert iterator to list here
 
     python_files = []
     dir_counts = defaultdict(int)
@@ -26,7 +29,8 @@ def get_python_files_from_gcs(bucket_name):
             if dir_counts[dir_name] <= MAX_FILES:
                 python_files.append(blob)
             else:
-                print(f"Ignoring files in directory {dir_name} as it contains more than {MAX_FILES} files.")
+                print(
+                    f"Ignoring files in directory {dir_name} as it contains more than {MAX_FILES} files.")
 
     return python_files
 
@@ -47,7 +51,7 @@ def tokenize(text):
 
 
 def save_to_gcs(processed_content, file_path, bucket_name):
-    file_name = f"processed/{file_path}"
+    file_name = f"processed/{file_path}.json"  # append a json at the end - cause the processed files will be in JSON format
     client = storage.Client()
     bucket = client.get_bucket(bucket_name)
     blob = storage.Blob(file_name, bucket)
