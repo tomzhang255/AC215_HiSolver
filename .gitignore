@@ -141,3 +141,5 @@ dmypy.json
 # .git in dvc container
 src/data-versioning/.git/
 
+#processed_dataset
+**/processed_data/
