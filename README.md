@@ -59,11 +59,30 @@ At this stage, we are using a container to run a python script that scrapes data
 
 As of 09/26/2023, there are approximately 2,400 such repositories of interest. It takes approximately 1 second to collect and upload 3 Python files to the GCS bucket.
 
+All files will be stored within the `raw/` folder on the bucket, while preserving directory structure from the original repositories from which they were extracted.
+
 #### 2. Data Pre-processing
 
 See `src/preprocessing/README.md` for an in-depth description of how to set up this component of the pipeline.
 
-Note that not all Python files we collected from the last step are relevant. We are only interested in those that contain code examples of actually using the Manim package. So at this step, we will first be filtering for relevant Python files by looking for appropriate import statements. Then we perform standard text preprocessing procedures for NLP such as tokenization, encoding, etc.
+Note that not all Python files we collected from the last step are relevant. We are only interested in those that contain code examples of actually using the Manim package. So at this step, we will first be filtering for relevant Python files by looking for appropriate import statements. Then we perform standard text preprocessing procedures for NLP such as tokenization, encoding, etc. To optimize speed, we're currently ignoring any subdirectory with more than 20 Python files.
+
+At the end, the processed data will be stored in the `processed/` folder on the bucket. The directory structure will be exactly the same, except that each Python file will have a `.json` appendix - as we would have transformed the Python file content into JSON files. Each JSON file has the following structure:
+
+```json
+[
+  {
+    "input": "# `` .animate '' syntax :",
+    "output": "self.play ( grid.animate.shift ( LEFT ) )"
+  },
+  {
+    "input": "# Tex to color map",
+    "output": "t2c = { `` A '' : BLUE , `` B '' : TEAL , `` C '' : GREEN , }"
+  }
+]
+```
+
+This will be our training data for fine-tuning the LLM - prompt and its expected output. For now, we've created the prompts by simply extracting the code comments from our scraped Python files. More refinements can be implemented in a later milestone.
 
 #### 3. LLM Fine-tuning
 
