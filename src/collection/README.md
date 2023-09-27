@@ -41,32 +41,34 @@
 
 ## IV. Run data collection script in a docker contianer
 
-1. Traverse to the correct directory: `src/collection/`
+1. Start a Docker daemon (i.e., open up Docker Desktop)
 
-2. Remove all containers built from this image if such containers exist
+2. Traverse to the correct directory: `src/collection/`
+
+3. Remove all containers built from this image if such containers exist
 
 ```shell
 docker ps -a --filter "ancestor=hisolver-manim-collection" -q | xargs docker stop && docker ps -a --filter "ancestor=hisolver-manim-collection" -q | xargs docker rm
 ```
 
-3. Remove image if it exists
+4. Remove image if it exists
 
 ```shell
 docker images | grep -q "hisolver-manim-collection" && docker rmi hisolver-manim-collection
 ```
 
-4. Build docker image
+5. Build docker image
 
 ```shell
 docker build -t hisolver-manim-collection .
 ```
 
-5. Run collection script in container
+6. Run collection script in container
 
 ```shell
 docker run -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json -e GITHUB_PAT=$(cat secrets/pat.txt) -e GCS_BUCKET_NAME=$(cat secrets/gcs_bucket_name.txt) hisolver-manim-collection
 ```
 
-6. The collection script should be running; if you go to your bucket page again on GCP, you should see the bucket being populated with scraped python files
+7. The collection script should be running; if you go to your bucket page again on GCP, you should see the bucket being populated with scraped Python files in the `raw/` folder
 
-7. In case you need to rebuild the container, just rerun steps 2-4
+8. In case you need to rebuild the container, just rerun steps 3-5
