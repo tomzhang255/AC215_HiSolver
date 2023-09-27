@@ -45,25 +45,25 @@
 
 2. Remove all containers built from this image if such containers exist
 
-```
+```shell
 docker ps -a --filter "ancestor=hisolver-manim-collection" -q | xargs docker stop && docker ps -a --filter "ancestor=hisolver-manim-collection" -q | xargs docker rm
 ```
 
 3. Remove image if it exists
 
-```
+```shell
 docker images | grep -q "hisolver-manim-collection" && docker rmi hisolver-manim-collection
 ```
 
 4. Build docker image
 
-```
+```shell
 docker build -t hisolver-manim-collection .
 ```
 
 5. Run collection script in container
 
-```
+```shell
 docker run -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json -e GITHUB_PAT=$(cat secrets/pat.txt) -e GCS_BUCKET_NAME=$(cat secrets/gcs_bucket_name.txt) hisolver-manim-collection
 ```
 
