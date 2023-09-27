@@ -142,4 +142,4 @@ dmypy.json
 src/data-versioning/.git/
 
 #processed_dataset
-**/processed_data/
+**/processed_dataset/

@@ -1,6 +1,0 @@
-[
-    {
-        "input": "# { { scene_name_lowercase } } '' > \u00b6 < /a > < /h5 >",
-        "output": "{ { source_block } } { % endif % } .. raw : : html < /div > '' '' ''"
-    }
-]
