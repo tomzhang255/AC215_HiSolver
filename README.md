@@ -24,7 +24,7 @@ AC215 - Milestone2
             |── data-versioning
             |     ├── README.md
             |     ├── docker-shell.bat
-            |     ├──  docker-shell.sh
+            |     ├── docker-shell.sh
             |     ├── Dockerfile
             |     ├── Pipfile
             |     ├── Pipfile.lock
