@@ -137,3 +137,7 @@ dmypy.json
 
 # macOS
 **/.DS_Store
+
+# .git in dvc container
+src/data-versioning/.git/
+

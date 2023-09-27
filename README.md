@@ -21,6 +21,16 @@ AC215 - Milestone2
             |     ├── Dockerfile
             |     ├── preprocessing.py
             |     └── requirements.txt
+            |── data-versioning
+            |     ├── README.md
+            |     ├── docker-shell.bat
+            |     ├──  docker-shell.sh
+            |     ├── Dockerfile
+            |     ├── Pipfile
+            |     ├── Pipfile.lock
+            |     ├── processed_dataset.dvc
+            |     ├── processed_dataset
+            |     └── cli.py
             |── training
             |     ├── README.md
             |     ├── Dockerfile
@@ -84,10 +94,18 @@ At the end, the processed data will be stored in the `processed/` folder on the 
 
 This will be our training data for fine-tuning the LLM - prompt and its expected output. For now, we've created the prompts by simply extracting the code comments from our scraped Python files. More refinements can be implemented in a later milestone.
 
-#### 3. LLM Fine-tuning
+#### 3. Data versioning
+
+See `src/data-versioning/README.md` for an in-depth description of how to set up this component of the pipeline.
+
+This Python-scripted Docker container is orchestrated to securely download and manage processed data from a designated Google Cloud Storage bucket, aimed at implementing Data Version Control (DVC) on the cloud. Initiated by a shell script, the container interfaces with the Google Cloud environment, pulling relevant data blobs and ensuring their organized local placement, thus facilitating streamlined, secure, and orderly data retrieval and versioning workflows within cloud-based storage solutions.
+
+All files will be stored within the `dvc_store/` folder on the bucket, while preserving directory structure from the original repositories from which they were extracted.
+
+#### 4. LLM Fine-tuning
 
 For a future milestone.
 
-#### 4. Model Deployment
+#### 5. Model Deployment
 
 Also for a future milestone.
