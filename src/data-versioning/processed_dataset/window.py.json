@@ -1,0 +1,22 @@
+[
+    {
+        "input": "# x , y for integers x and y",
+        "output": "if `` , '' in custom_position : return tuple ( map ( int , custom_position.split ( `` , '' ) ) )"
+    },
+    {
+        "input": "# UR , OO , DL , etc . specifying what corner it should go to",
+        "output": "char_to_n = { `` L '' : 0 , `` U '' : 0 , `` O '' : 1 , `` R '' : 2 , `` D '' : 2 } width_diff = monitor.width - window_width height_diff = monitor.height - window_height return ( monitor.x + char_to_n [ custom_position [ 1 ] ] * width_diff // 2 , -monitor.y + char_to_n [ custom_position [ 0 ] ] * height_diff // 2 , )"
+    },
+    {
+        "input": "# Delegate event handling to scene",
+        "output": "def pixel_coords_to_space_coords ( self , px : int , py : int , relative : bool = False ) - > np.ndarray : if not hasattr ( self.scene , `` frame '' ) : return np.zeros ( 3 ) pixel_shape = np.array ( self.size ) fixed_frame_shape = np.array ( FRAME_SHAPE ) frame = self.scene.frame coords = np.zeros ( 3 ) coords [ :2 ] = ( fixed_frame_shape / pixel_shape ) * np.array ( [ px , py ] ) if not relative : coords [ :2 ] -= 0.5 * fixed_frame_shape return frame.from_fixed_frame_point ( coords , relative ) def on_mouse_motion ( self , x : int , y : int , dx : int , dy : int ) - > None : super ( ) .on_mouse_motion ( x , y , dx , dy ) point = self.pixel_coords_to_space_coords ( x , y ) d_point = self.pixel_coords_to_space_coords ( dx , dy , relative=True ) self.scene.on_mouse_motion ( point , d_point ) def on_mouse_drag ( self , x : int , y : int , dx : int , dy : int , buttons : int , modifiers : int ) - > None : super ( ) .on_mouse_drag ( x , y , dx , dy , buttons , modifiers ) point = self.pixel_coords_to_space_coords ( x , y ) d_point = self.pixel_coords_to_space_coords ( dx , dy , relative=True ) self.scene.on_mouse_drag ( point , d_point , buttons , modifiers ) def on_mouse_press ( self , x : int , y : int , button : int , mods : int ) - > None : super ( ) .on_mouse_press ( x , y , button , mods ) point = self.pixel_coords_to_space_coords ( x , y ) self.scene.on_mouse_press ( point , button , mods ) def on_mouse_release ( self , x : int , y : int , button : int , mods : int ) - > None : super ( ) .on_mouse_release ( x , y , button , mods ) point = self.pixel_coords_to_space_coords ( x , y ) self.scene.on_mouse_release ( point , button , mods ) def on_mouse_scroll ( self , x : int , y : int , x_offset : float , y_offset : float ) - > None : super ( ) .on_mouse_scroll ( x , y , x_offset , y_offset ) point = self.pixel_coords_to_space_coords ( x , y ) offset = self.pixel_coords_to_space_coords ( x_offset , y_offset , relative=True ) self.scene.on_mouse_scroll ( point , offset , x_offset , y_offset ) def on_key_press ( self , symbol : int , modifiers : int ) - > None : self.pressed_keys.add ( symbol )"
+    },
+    {
+        "input": "# Modifiers ?",
+        "output": "super ( ) .on_key_press ( symbol , modifiers ) self.scene.on_key_press ( symbol , modifiers ) def on_key_release ( self , symbol : int , modifiers : int ) - > None : self.pressed_keys.difference_update ( { symbol } )"
+    },
+    {
+        "input": "# Modifiers ?",
+        "output": "super ( ) .on_key_release ( symbol , modifiers ) self.scene.on_key_release ( symbol , modifiers ) def on_resize ( self , width : int , height : int ) - > None : super ( ) .on_resize ( width , height ) self.scene.on_resize ( width , height ) def on_show ( self ) - > None : super ( ) .on_show ( ) self.scene.on_show ( ) def on_hide ( self ) - > None : super ( ) .on_hide ( ) self.scene.on_hide ( ) def on_close ( self ) - > None : super ( ) .on_close ( ) self.scene.on_close ( ) def is_key_pressed ( self , symbol : int ) - > bool : return ( symbol in self.pressed_keys )"
+    }
+]

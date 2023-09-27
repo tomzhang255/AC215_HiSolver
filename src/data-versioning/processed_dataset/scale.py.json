@@ -1,0 +1,6 @@
+[
+    {
+        "input": "# uses ` format ` syntax to control the number of decimal places .",
+        "output": "tex_labels = [ Integer ( self.base , unit= '' ^ { % s } '' % ( f '' { self.inverse_function ( i ) : . { unit_decimal_places } f } '' ) , * * base_config , ) for i in val_range ] return tex_labels"
+    }
+]

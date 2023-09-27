@@ -1,0 +1,6 @@
+[
+    {
+        "input": "# assumption of 200 ppmu ( pixels per manim unit ) would suffice",
+        "output": "resample=self.resampling_algorithm , ) )"
+    }
+]

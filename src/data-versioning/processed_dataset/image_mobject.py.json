@@ -1,0 +1,6 @@
+[
+    {
+        "input": "# TODO , raise smarter exception",
+        "output": "raise Exception ( `` Can not sample color from outside an image '' ) pw , ph = self.image.size rgb = self.image.getpixel ( ( int ( ( pw - 1 ) * x_alpha ) , int ( ( ph - 1 ) * y_alpha ) , ) ) return np.array ( rgb ) / 255"
+    }
+]

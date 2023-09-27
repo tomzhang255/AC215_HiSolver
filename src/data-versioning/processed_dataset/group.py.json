@@ -1,0 +1,18 @@
+[
+    {
+        "input": "# in the future when implementing a full template system . Choices are going to be saved in some sort of config file for templates",
+        "output": "template_name = click.prompt ( `` Template '' , type=click.Choice ( get_template_names ( ) , False ) , default= '' Default '' , ) if project_name.is_dir ( ) : console.print ( f '' \\nFolder [ red ] { project_name } [ /red ] exists . Please type another name\\n '' , ) else : project_name.mkdir ( ) new_cfg = { } new_cfg_path = Path.resolve ( project_name / `` manim.cfg '' ) if not default_settings : for key , value in CFG_DEFAULTS.items ( ) : if key == `` scene_names '' : new_cfg [ key ] = template_name + `` Template '' elif key == `` resolution '' : new_cfg [ key ] = select_resolution ( ) else : new_cfg [ key ] = click.prompt ( f '' \\n { key } '' , default=value ) console.print ( `` \\n '' , new_cfg ) if click.confirm ( `` Do you want to continue ? `` , default=True , abort=True ) : copy_template_files ( project_name , template_name ) update_cfg ( new_cfg , new_cfg_path ) else : copy_template_files ( project_name , template_name ) update_cfg ( CFG_DEFAULTS , new_cfg_path ) @ cloup.command ( context_settings=CONTEXT_SETTINGS , no_args_is_help=True , epilog=EPILOG , ) @ cloup.argument ( `` scene_name '' , type=str , required=True ) @ cloup.argument ( `` file_name '' , type=str , required=False ) def scene ( * * args ) : `` '' '' Inserts a SCENE to an existing FILE or creates a new FILE . SCENE is the name of the scene that will be inserted . FILE is the name of file in which the SCENE will be inserted. `` '' '' if not Path ( `` main.py '' ) .exists ( ) : raise FileNotFoundError ( f '' { Path ( 'main.py ' ) } : Not a valid project directory . '' ) template_name = click.prompt ( `` template '' , type=click.Choice ( get_template_names ( ) , False ) , default= '' Default '' , ) scene = ( get_template_path ( ) / f '' { template_name } .mtp '' ) .resolve ( ) .read_text ( ) scene = scene.replace ( template_name + `` Template '' , args [ `` scene_name '' ] , 1 ) if args [ `` file_name '' ] : file_name = Path ( args [ `` file_name '' ] + `` .py '' ) if file_name.is_file ( ) :"
+    },
+    {
+        "input": "# file exists so we are going to append new scene to that file",
+        "output": "with file_name.open ( `` a '' ) as f : f.write ( `` \\n\\n\\n '' + scene ) else :"
+    },
+    {
+        "input": "# file does not exist so we create a new file , append the scene and prepend the import statement",
+        "output": "file_name.write_text ( `` \\n\\n\\n '' + scene ) add_import_statement ( file_name ) else :"
+    },
+    {
+        "input": "# if main.py does not exist we do not continue",
+        "output": "with Path ( `` main.py '' ) .open ( `` a '' ) as f : f.write ( `` \\n\\n\\n '' + scene ) @ cloup.group ( context_settings=CONTEXT_SETTINGS , invoke_without_command=True , no_args_is_help=True , epilog=EPILOG , help= '' Create a new project or insert a new scene . `` , deprecated=True , ) @ cloup.pass_context def new ( ctx ) : pass new.add_command ( project ) new.add_command ( scene )"
+    }
+]

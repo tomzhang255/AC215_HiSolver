@@ -1,0 +1,6 @@
+[
+    {
+        "input": "# Num is equal to int ( stop - start ) / ( step + 1 ) reformulated .",
+        "output": "for theta in np.linspace ( 0 , 2 * np.pi , num=int ( 2 * np.pi * ( r + self.epsilon ) / self.epsilon ) , ) ] , dtype=np.float32 , ) def make_3d ( self , gloss=0.5 , shadow=0.2 ) : self.set_gloss ( gloss ) self.set_shadow ( shadow ) self.apply_depth_test ( ) return self class TrueDot ( DotCloud ) : def __init__ ( self , center=ORIGIN , stroke_width=2.0 , * * kwargs ) : self.radius = stroke_width super ( ) .__init__ ( points= [ center ] , stroke_width=stroke_width , * * kwargs )"
+    }
+]

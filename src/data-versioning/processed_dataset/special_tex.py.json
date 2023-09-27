@@ -1,0 +1,6 @@
+[
+    {
+        "input": "# This will override underline_width",
+        "output": "match_underline_width_to_text : bool = False , underline_buff : float = SMALL_BUFF , underline_style : dict = dict ( stroke_width=2 , stroke_color=GREY_C ) , * * kwargs ) : super ( ) .__init__ ( * text_parts , font_size=font_size , * * kwargs ) self.to_edge ( UP , buff=MED_SMALL_BUFF ) if include_underline : underline = Line ( LEFT , RIGHT , * * underline_style ) underline.next_to ( self , DOWN , buff=underline_buff ) if match_underline_width_to_text : underline.match_width ( self ) else : underline.set_width ( underline_width ) self.add ( underline ) self.underline = underline"
+    }
+]

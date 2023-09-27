@@ -1,0 +1,6 @@
+[
+    {
+        "input": "# Works by saving the mob that is passed into the animation , scaling it to 0 ( or the initial_width ) and then restoring the original mob .",
+        "output": "if mobject.fill_opacity : fill_o = True else : fill_o = False for _ in range ( self.n_mobs ) : mob = mobject.copy ( ) if fill_o : mob.set_opacity ( self.final_opacity ) else : mob.set_stroke ( opacity=self.final_opacity ) mob.move_to ( self.focal_point ) mob.save_state ( ) mob.set_width ( self.initial_width ) if fill_o : mob.set_opacity ( self.initial_opacity ) else : mob.set_stroke ( opacity=self.initial_opacity ) anims.append ( Restore ( mob , remover=remover ) ) super ( ) .__init__ ( * anims , run_time=run_time , lag_ratio=lag_ratio , * * kwargs )"
+    }
+]

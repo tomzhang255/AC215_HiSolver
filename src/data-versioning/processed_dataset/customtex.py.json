@@ -1,0 +1,18 @@
+[
+    {
+        "input": "# Create a new template",
+        "output": "myTemplate = TexTemplate ( )"
+    },
+    {
+        "input": "# Add packages to the template",
+        "output": "myTemplate.add_to_preamble ( r '' \\usepackage { esvect } '' )"
+    },
+    {
+        "input": "# possible output formats : `` .dvi '' , `` .pdf '' , and `` .xdv ''",
+        "output": "myTemplate.tex_compiler = `` latex '' myTemplate.output_format = `` .dvi ''"
+    },
+    {
+        "input": "# use the keyword argument tex_template",
+        "output": "text = MathTex ( r '' \\vv { vb } '' , tex_template=myTemplate ) self.play ( Write ( text ) ) self.wait ( 1 )"
+    }
+]
