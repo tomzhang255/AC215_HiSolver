@@ -30,7 +30,7 @@ def extract_classes(temp_dir, blob_name):
     try:
         tree = ast.parse(file_contents)
     except SyntaxError as e:
-        print(f"Failed to parse {blob_name}: {e}")
+        # print(f"Failed to parse {blob_name}: {e}")
         return [], blob_name
 
     # Extract class definitions
@@ -39,7 +39,7 @@ def extract_classes(temp_dir, blob_name):
         if isinstance(node, ast.ClassDef)
     ]
 
-    print(f'Extracted classes from {blob_name}')
+    # print(f'Extracted classes from {blob_name}')
 
     return class_defs, blob_name
 
@@ -61,9 +61,6 @@ if __name__ == '__main__':
 
     print('===== Finished downloading files from GSC')
     sys.stdout.flush()
-
-    # List the downloaded files
-    # file_paths = [os.path.join(temp_dir, blob.name) for blob in blobs]
 
     # Use Dask to process the files in parallel
     delayed_tasks = [delayed(extract_classes)(temp_dir, blob.name)
