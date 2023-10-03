@@ -1,6 +1,4 @@
-# AC215_HiSolver (Milestone2)
-
-AC215 - Milestone2
+# AC215_HiSolver
 
 ## Project Organization
 
@@ -44,9 +42,7 @@ AC215 - Milestone2
 
 ---
 
-## AC215 - Milestone2 - HiSolver
-
-### Project Intro
+## Project Intro
 
 **Team Members:**
 Yan Kaled, Tom Zhang, Tadhg Looram, Mina Lee, Jason Xiang, Nishtha Sardana & Kareema Batool
@@ -57,7 +53,9 @@ HiSolver
 **Project:**
 In this project, we are fine-tuning an LLM for an animation engine (specifically Python package Manim). The goal is to develop an AI application powered by an LLM that can receive user input in the form of raw text consisting of mathematical problems at the SAT level. The application should provide step-by-step solutions or hints for the student - as well as generate Python code for the animation engine. One major challenge would be to construct and fine-tune the said LLM.
 
-### Milestone2
+## Milestone Tracking
+
+### Milestone 2
 
 Our proposed data pipeline has 4 major steps: data collection, data pre-processing, LLM fine-tuning, and model deployment. For this milestone, we will be solely focusing on the first two components.
 
@@ -109,3 +107,34 @@ For a future milestone.
 #### 5. Model Deployment
 
 Also for a future milestone.
+
+### Milestone 3
+
+We improved upon existing components from the previous milestone as well as implemented new components of our data pipeline.
+
+#### Data Pre-processing
+
+Revise the output structure so that each input prompt is associated with a self-contained code snippet (rather than a comment with a single line of code as illustrated in milestone 2).
+
+TODO prettify this section
+
+JK... for pre-processing here's what we're gonna do:
+
+for each python file:
+
+- extract all the classes
+  - somehow use Dask
+  - (perhaps imports too but optional)
+  - (next step - all the classes with a construct function - more work...)
+- upload these class code snippets to label studio
+  - for users to manually describe what the codes do...
+- [advanced] - for the 100 purchased animation code snippets
+  - insert the YouTube animation link for that piece of code
+
+now each JSON file will just be a list of strings (class definition code snippets)
+
+TODO label studio - so that users can manually label those code snippets
+
+#### DVC
+
+TODO some comment on DVC - cause our commit last time was past the deadline

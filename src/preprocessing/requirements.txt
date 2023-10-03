@@ -1,3 +1,4 @@
 google-cloud-storage
-nltk
-requests
+dask
+dask[distributed]
+astor
