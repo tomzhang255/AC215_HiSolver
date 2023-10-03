@@ -47,7 +47,11 @@ def save_to_gcs(file_url, file_path, bucket_name):
     content = res_data.get('content')
     if content is None:
         return
-    decoded_content = base64.b64decode(content).decode('utf-8')
+
+    try:
+        decoded_content = base64.b64decode(content).decode('utf-8')
+    except UnicodeDecodeError:
+        return
 
     # file name to upload to bucket
     parts = file_url.split("/")
