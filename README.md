@@ -110,9 +110,9 @@ Also for a future milestone.
 
 ### Milestone 3
 
-We improved upon existing components from the previous milestone as well as implemented new components of our data pipeline.
+We improved upon existing components from the previous milestone as well as implemented new components of our data pipeline. The following are the tasks we accomplished for this milestone.
 
-#### Data Pre-processing
+#### 1. Data Pre-processing
 
 Revise the output structure so that each input prompt is associated with a self-contained code snippet (rather than a comment with a single line of code as illustrated in milestone 2).
 
@@ -135,6 +135,18 @@ now each JSON file will just be a list of strings (class definition code snippet
 
 TODO label studio - so that users can manually label those code snippets
 
-#### DVC
+#### 2. Labeling
+
+- TODO connect the preprocessed json files to label studio
+
+#### 3. Training
+
+- TODO use TF data/records to prep input for training
+- TODO use GCP's Vertex AI to do
+  - experiment tracking
+  - hyperparameter tuning
+  - serverless training
+
+#### 4. DVC
 
 TODO some comment on DVC - cause our commit last time was past the deadline
