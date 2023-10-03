@@ -71,8 +71,9 @@ if __name__ == '__main__':
     sys.stdout.flush()
 
     # Save the results to JSON and upload to GCS
+    processed_dir = 'processed'
     for class_def_list, python_file_name in results:
-        json_filename = f'processed/{python_file_name[4:]}.json'
+        json_filename = f'{processed_dir}/{python_file_name[4:]}.json'
         os.makedirs(os.path.dirname(json_filename), exist_ok=True)
         with open(json_filename, 'w') as f:
             json.dump(class_def_list, f)
@@ -85,6 +86,7 @@ if __name__ == '__main__':
 
     # Optionally, clean up the temporary directory
     shutil.rmtree(temp_dir)
+    shutil.rmtree(processed_dir)
 
     t1 = datetime.now()
     print(f'===== Time elasposed to pre-process: {t1 - t0}')
