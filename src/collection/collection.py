@@ -84,7 +84,11 @@ def main():
         # get a list of 100 repos containing keyword "manim"
         response = requests.get(
             f"{GITHUB_API_URL}&per_page={PER_PAGE}&page={page}", headers=HEADERS)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except:
+            print(f'Failed to /GET page {page}; skipping...')
+            continue
 
         items = response.json().get('items', [])
 
