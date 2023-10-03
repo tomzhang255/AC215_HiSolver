@@ -91,16 +91,15 @@ def main():
         for item in items:
             # for each repo, get all python files
             python_files = get_python_files_from_repo(item['full_name'])
+            sleep(1)
             for file_url, file_path in python_files:
                 # save each python file to GCP bucket
                 save_to_gcs(file_url, file_path, GCS_BUCKET_NAME)
 
+        print(f"--- Page: {page} done ---")
         page += 1
-        print(f"Page: {page} done")
-        sleep(1)
-        break
 
-    print('All done')
+    print('--- All pages done ---')
 
 
 if __name__ == "__main__":
