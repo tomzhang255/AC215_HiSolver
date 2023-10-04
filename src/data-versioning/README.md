@@ -7,6 +7,7 @@ This Python-scripted Docker container is orchestrated to securely download and m
 Make sure you've followed all the steps from the data collection section `src/collection/README.md`.
 
 ## II. Create a Data Store folder in GCS Bucket
+
 1. Go to https://console.cloud.google.com/storage/browser
 
 2. Go to the bucket hisolver-data-collection-2 (change to your bucketname)
@@ -51,13 +52,13 @@ git init
 dvc init
 ```
 
-9. Add Remote Registry to GCS Bucket  - Note change 'hisolver-data-collection-2' to you bucket name
+9. Add Remote Registry to GCS Bucket - Note change 'hisolver-data-collection-2' to you bucket name
 
 ```shell
 dvc remote add -d processed_dataset gs://hisolver-data-collection-2/dvc_store
 ```
 
-10. Add the dataset to registry and push 
+10. Add the dataset to registry and push
 
 ```shell
 dvc add mushroom_dataset

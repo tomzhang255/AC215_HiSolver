@@ -114,34 +114,29 @@ We improved upon existing components from the previous milestone as well as impl
 
 #### 1. Data Pre-processing (Continued)
 
-Revise the output structure so that each input prompt is associated with a self-contained code snippet (rather than a comment with a single line of code as illustrated in milestone 2).
+See `src/preprocessing/README.md` for an in-depth description of how to set up this component of the pipeline.
 
-TODO prettify this section
+We changed up the logic a bit since last time: now we are parsing each python file to extract all class definition code snippets (as that's essentially how Manim animations are defined). We separate code snippets into their own JSON files, each with the following structure:
 
-JK... for pre-processing here's what we're gonna do:
+```json
+{
+  "data": {
+    "code": "class DrawCircle(Scene):\n    def construct(): pass"
+  }
+}
+```
 
-for each python file:
-
-- extract all the classes
-  - somehow use Dask
-  - (perhaps imports too but optional)
-  - (next step - all the classes with a construct function - more work...)
-- upload these class code snippets to label studio
-  - for users to manually describe what the codes do...
-- [advanced] - for the 100 purchased animation code snippets
-  - insert the YouTube animation link for that piece of code
-
-now each JSON file will just be a list of strings (class definition code snippets)
-
-TODO label studio - so that users can manually label those code snippets
+Note that at this step we're only worried about extracting the code snippets. Fine-tuning an LLM would also require the input prompt associated with those code outputs. For quality assurance, we will be using Label Studio for humans to manually provide those code summaries. We will describe how to set up Label Studio in the next section.
 
 #### 2. Data Labeling
 
-- TODO connect the preprocessed json files to label studio
+See `src/data-labeling/README.md` for an in-depth description of how to set up this component of the pipeline.
 
-#### 3. Training
+This component of the pipeline involves setting up a Label Studio web app so that users can manually provide summaries to those code snippets we previously processed.
 
-- TODO use TF data/records to prep input for training
+#### 3. Training [TODO - only thing left for this milestone]
+
+- TODO get labeled data then use TF data/records to prep input for training
 - TODO use GCP's Vertex AI to do
   - experiment tracking
   - hyperparameter tuning
@@ -157,4 +152,5 @@ TODO this is the updated data pipeline: TODO list components, etc.
 
 #### Aside
 
-- copying the secrets folder everywhere is not good practice; might need to look into docker-compose instead of Dockerfile because volume mounting with relative path doesn't work for Dockerfile
+- FIXME Copying the secrets folder everywhere is not good practice; might need to look into docker-compose instead of Dockerfile because volume mounting with relative path doesn't work for Dockerfile
+- FIXME preprocessing.py is kinda slow - the last part... parhaps save locally then bulk upload?
