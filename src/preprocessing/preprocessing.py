@@ -69,16 +69,21 @@ if __name__ == '__main__':
     print('===== Finished processing with Dask')
     sys.stdout.flush()
 
-    # Save the results to JSON and upload to GCS
+    # Save the results to GCS
     processed_dir = 'processed'
     for class_def_list, python_file_name in results:
-        json_filename = f'{processed_dir}/{python_file_name[4:]}.json'
-        os.makedirs(os.path.dirname(json_filename), exist_ok=True)
-        with open(json_filename, 'w') as f:
-            json.dump(class_def_list, f)
-        # Upload the JSON file to GCS
-        blob = bucket.blob(json_filename)
-        blob.upload_from_filename(json_filename)
+        for idx, class_def in enumerate(class_def_list):
+            # note each class_def_list is associated with a python file
+            # we want to separate each class definition snippet into its own file
+            # so we generate a file name by appending index to original python file name
+            json_filename = f'{processed_dir}/{python_file_name[4:]}-{idx}.json'
+            os.makedirs(os.path.dirname(json_filename), exist_ok=True)
+            with open(json_filename, 'w') as f:
+                # this is the data format required for Lebel Studio
+                json.dump({"data": {"code": class_def}}, f)
+            # Upload the JSON file to GCS
+            blob = bucket.blob(json_filename)
+            blob.upload_from_filename(json_filename)
 
     print('===== Finished saving results to GCS')
     sys.stdout.flush()

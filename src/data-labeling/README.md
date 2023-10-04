@@ -34,8 +34,20 @@ docker-compose run --rm --service-ports hisolver-data-label-cli
     - add source storage
       - storage type: GCS
       - Manim Code Snippets, hisolver-data-collection [specific], processed, .\*
+      - uncheck both
       - Sync Storage
     - Add Target Storage
       - Manim Code Snippets, hisolver-data-collection, labeled
 - enable cors back in shell
 - use label studio to annotate manim code snippets
+
+- labeling interface UI:
+
+```
+<View style="white-space: pre;">
+  <Header value="Read this piece of Manim code"/>
+  <Text name="text" value="$code"/>
+  <Header value="Provide a one sentence summary of what it does"/>
+  <TextArea name="answer" toName="text" showSubmitButton="true" maxSubmissions="1" editable="true" required="true"/>
+</View>
+```
