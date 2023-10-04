@@ -19,6 +19,13 @@
             |     ├── Dockerfile
             |     ├── preprocessing.py
             |     └── requirements.txt
+            |── data-labeling
+            |     ├── README.md
+            |     ├── Dockerfile
+            |     ├── docker-compose.yml
+            |     ├── cli.py
+            |     ├── Pipfile
+            |     └── Pipfile.lock
             |── data-versioning
             |     ├── README.md
             |     ├── docker-shell.bat
