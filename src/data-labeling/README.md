@@ -118,3 +118,9 @@ docker-compose run --rm --service-ports hisolver-data-label-cli
 - Click `Delete Tasks`
 - Go to Settings for this labeling project -> `Cloud Storage`
 - Click `Sync Storage` for both the source and target
+
+4. Stop the Label Studio container along with quitting the CLI shell
+
+```shell
+docker stop hisolver-data-label-studio
+```
