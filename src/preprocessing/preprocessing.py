@@ -3,7 +3,6 @@ import ast
 import astor
 import json
 import tempfile
-from lib2to3.refactor import RefactoringTool
 from datetime import datetime
 import shutil
 import sys
