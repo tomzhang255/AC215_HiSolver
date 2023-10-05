@@ -32,8 +32,15 @@ class CustomDataset(Dataset):
         """
         item = self.data[idx]
         prompt, code = item['prompt'], item['code']
-        encoding = self.tokenizer(prompt, code, truncation=True,
-                                  padding='max_length', max_length=512, return_tensors='pt')
+        encoding = self.tokenizer.encode_plus(
+            prompt,
+            code,
+            truncation=True,
+            padding='max_length',
+            max_length=512,
+            return_tensors='pt',
+            add_special_tokens=True  # Add '[CLS]', '[SEP]'
+        )
         return {key: val.squeeze(0) for key, val in encoding.items()}
 
 
