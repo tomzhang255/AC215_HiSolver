@@ -1,0 +1,4 @@
+[core]
+    remote = tadhg_remote
+['remote "tadhg_remote"']
+    url = gs://hisolver-data-collection-2/dvc_store
