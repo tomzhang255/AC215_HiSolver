@@ -128,3 +128,21 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# secrets
+**/secrets/
+
+# vscode
+**/.vscode/
+
+# macOS
+**/.DS_Store
+
+# .git in dvc container
+src/data-versioning/.git/
+
+#processed_dataset
+**/processed_dataset/
+
+# docker volumes
+**/docker-volumes
