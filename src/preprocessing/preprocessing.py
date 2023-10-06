@@ -94,7 +94,6 @@ if __name__ == '__main__':
     subprocess.run(["dvc", "add", processed_dir])  # Track processed directory with DVC
     subprocess.run(["dvc", "push", "-r",DVC_REMOTE_NAME])  # Push changes to DVC remote on GCS
     subprocess.run(["git", "add", ".dvc", f"{processed_dir}.dvc"])  # Add DVC metadata files to Git
-    subprocess.run(["git", "add", ".gitignore", f"{processed_dir}.dvc"])  # Add DVC metadata files to Git
     subprocess.run(["git", "commit", "-m", "Update processed data"])  # Commit the DVC changes to Git
 
     # Optionally, clean up the temporary directory
