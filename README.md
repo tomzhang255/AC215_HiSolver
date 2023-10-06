@@ -94,7 +94,7 @@ Note that at this step we're only worried about extracting the code snippets. Fi
 
 See `src/data-labeling/README.md` for an in-depth description of how to set up this component of the pipeline.
 
-This component of the pipeline involves setting up a Label Studio web app so that users can manually provide summaries to those code snippets we previously processed.
+This component of the pipeline involves setting up a Label Studio web app so that users can manually provide summaries to those code snippets we previously processed. For the end user, they would access the web app, review a code snippet, then provide a summary of what it does. Then both the user annotation as well as the original code snippet would be uploaded to the `labeled` folder on the GCS bucket.
 
 ### 4. Data Versioning
 
