@@ -47,6 +47,9 @@ git commit -m "adding my remote dvc"
 git push origin branch_name
 ```
 
+Create a File for the DVC Remote:
+Inside your secrets folder, create a file named dvc_remote_name.txt and write the name of your DVC remote ({NAME}_remote) into this file.
+ 
 ## IV. GCS Object Versioning vs DVC 
 
 In our project we will be using both GCS object versioning functionality and the DVC module. 
