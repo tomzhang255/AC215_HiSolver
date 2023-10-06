@@ -6,13 +6,13 @@ import tempfile
 from datetime import datetime
 import shutil
 import sys
-
+import subprocess
 import dask
 from dask import delayed
 from dask.distributed import Client
 from google.cloud import storage
 
-
+DVC_REMOTE_NAME = os.environ.get("DVC_REMOTE_NAME")
 GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
 
 
@@ -87,6 +87,14 @@ if __name__ == '__main__':
 
     print('===== Finished saving results to GCS')
     sys.stdout.flush()
+
+    # DVC operations
+    os.chdir('/app')  # Ensure we're in the right directory
+    subprocess.run(["dvc", "add", processed_dir])  # Track processed directory with DVC
+    subprocess.run(["dvc", "push", "-r",DVC_REMOTE_NAME])  # Push changes to DVC remote on GCS
+    subprocess.run(["git", "add", ".dvc", f"{processed_dir}.dvc"])  # Add DVC metadata files to Git
+    subprocess.run(["git", "add", ".gitignore", f"{processed_dir}.dvc"])  # Add DVC metadata files to Git
+    subprocess.run(["git", "commit", "-m", "Update processed data"])  # Commit the DVC changes to Git
 
     # Optionally, clean up the temporary directory
     shutil.rmtree(temp_dir)
