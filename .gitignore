@@ -143,3 +143,6 @@ src/data-versioning/.git/
 
 #processed_dataset
 **/processed_dataset/
+
+# docker volumes
+**/docker-volumes
