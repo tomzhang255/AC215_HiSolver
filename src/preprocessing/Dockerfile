@@ -14,9 +14,6 @@ RUN apt-get install -y git
 COPY requirements.txt /requirements.txt
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Install DVC with GCS support
-# RUN pip install 'dvc[gcs]'
-
 # Set working directory
 WORKDIR /app
 

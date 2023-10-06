@@ -14,6 +14,7 @@ from google.cloud import storage
 
 DVC_REMOTE_NAME = os.environ.get("DVC_REMOTE_NAME")
 GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
+os.environ["HOME"] = "/app"
 
 
 def extract_classes(temp_dir, blob_name):

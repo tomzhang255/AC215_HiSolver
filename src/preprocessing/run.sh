@@ -10,12 +10,11 @@ docker images | grep -q "hisolver-manim-preprocessing" && docker rmi hisolver-ma
 docker build -t hisolver-manim-preprocessing .
 
 # Run pre-processing script in container
-# docker run -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json -e GCS_BUCKET_NAME=$(cat secrets/gcs_bucket_name.txt) hisolver-manim-preprocessing
-docker run \
+git docker run \
   -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json \
   -v $(pwd)/../../.dvc:/app/.dvc \
   -v $(pwd)/../../.git:/app/.git \
-  -v ~/.ssh:/root/.ssh \
+  -v ~/.gitconfig:/app/.gitconfig \
   -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json \
   -e GCS_BUCKET_NAME=$(cat secrets/gcs_bucket_name.txt) \
   -e DVC_REMOTE_NAME=$(cat secrets/dvc_remote_name.txt) \
