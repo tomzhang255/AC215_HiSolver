@@ -1,0 +1,4 @@
+[core]
+    remote = processed_dataset
+['remote "processed_dataset"']
+    url = gs://hisolver-data-collection-2/dvc_store
