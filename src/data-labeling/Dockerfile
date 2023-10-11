@@ -45,11 +45,6 @@ RUN pipenv sync
 # layers when we change a line of code.
 ADD --chown=app:app . /app
 
-RUN git config --global --add safe.directory /app
-
 # Entry point
 #ENTRYPOINT ["/bin/bash","./docker-entrypoint.sh"]
 ENTRYPOINT ["pipenv","shell"]
-
-# Specify the command to run on container start
-CMD [ "python", "./data_versioning.py -d"]

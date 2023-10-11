@@ -1,6 +1,4 @@
-# AC215_HiSolver (Milestone2)
-
-AC215 - Milestone2
+# AC215_HiSolver
 
 ## Project Organization
 
@@ -21,6 +19,13 @@ AC215 - Milestone2
             |     ├── Dockerfile
             |     ├── preprocessing.py
             |     └── requirements.txt
+            |── data-labeling
+            |     ├── README.md
+            |     ├── Dockerfile
+            |     ├── docker-compose.yml
+            |     ├── cli.py
+            |     ├── Pipfile
+            |     └── Pipfile.lock
             |── data-versioning
             |     ├── README.md
             |     ├── docker-shell.bat
@@ -44,9 +49,7 @@ AC215 - Milestone2
 
 ---
 
-## AC215 - Milestone2 - HiSolver
-
-### Project Intro
+## Project Intro
 
 **Team Members:**
 Yan Kaled, Tom Zhang, Tadhg Looram, Mina Lee, Jason Xiang, Nishtha Sardana & Kareema Batool
@@ -57,11 +60,11 @@ HiSolver
 **Project:**
 In this project, we are fine-tuning an LLM for an animation engine (specifically Python package Manim). The goal is to develop an AI application powered by an LLM that can receive user input in the form of raw text consisting of mathematical problems at the SAT level. The application should provide step-by-step solutions or hints for the student - as well as generate Python code for the animation engine. One major challenge would be to construct and fine-tune the said LLM.
 
-### Milestone2
+## Data Pipeline
 
-Our proposed data pipeline has 4 major steps: data collection, data pre-processing, LLM fine-tuning, and model deployment. For this milestone, we will be solely focusing on the first two components.
+Our proposed data pipeline has a few major components: data collection, data pre-processing, data labeling, data-versioning, LLM fine-tuning, and modeling deployment. The following is a description of what each component does.
 
-#### 1. Data Collection
+### 1. Data Collection
 
 See `src/collection/README.md` for an in-depth description of how to set up this component of the pipeline.
 
@@ -71,30 +74,29 @@ As of 09/26/2023, there are approximately 2,400 such repositories of interest. I
 
 All files will be stored within the `raw/` folder on the bucket, while preserving directory structure from the original repositories from which they were extracted.
 
-#### 2. Data Pre-processing
+### 2. Data Pre-processing
 
 See `src/preprocessing/README.md` for an in-depth description of how to set up this component of the pipeline.
 
-Note that not all Python files we collected from the last step are relevant. We are only interested in those that contain code examples of actually using the Manim package. So at this step, we will first be filtering for relevant Python files by looking for appropriate import statements. Then we perform standard text preprocessing procedures for NLP such as tokenization, encoding, etc. To optimize speed, we're currently ignoring any subdirectory with more than 20 Python files.
-
-At the end, the processed data will be stored in the `processed/` folder on the bucket. The directory structure will be exactly the same, except that each Python file will have a `.json` appendix - as we would have transformed the Python file content into JSON files. Each JSON file has the following structure:
+Now we are parsing each python file we just collected to extract all class definition code snippets (as that's essentially how Manim animations are defined). We separate code snippets into their own JSON files, each with the following structure:
 
 ```json
-[
-  {
-    "input": "# `` .animate '' syntax :",
-    "output": "self.play ( grid.animate.shift ( LEFT ) )"
-  },
-  {
-    "input": "# Tex to color map",
-    "output": "t2c = { `` A '' : BLUE , `` B '' : TEAL , `` C '' : GREEN , }"
+{
+  "data": {
+    "code": "class DrawCircle(Scene):\n    def construct(): pass"
   }
-]
+}
 ```
 
-This will be our training data for fine-tuning the LLM - prompt and its expected output. For now, we've created the prompts by simply extracting the code comments from our scraped Python files. More refinements can be implemented in a later milestone.
+Note that at this step we're only worried about extracting the code snippets. Fine-tuning an LLM would also require the input prompt associated with those code outputs. For quality assurance, we will be using Label Studio for humans to manually provide those code summaries. We will describe how to set up Label Studio in the next section.
 
-#### 3. Data versioning
+### 3. Data Labeling
+
+See `src/data-labeling/README.md` for an in-depth description of how to set up this component of the pipeline.
+
+This component of the pipeline involves setting up a Label Studio web app so that users can manually provide summaries to those code snippets we previously processed. For the end user, they would access the web app, review a code snippet, then provide a summary of what it does. Then both the user annotation as well as the original code snippet would be uploaded to the `labeled` folder on the GCS bucket.
+
+### 4. Data Versioning
 
 See `src/data-versioning/README.md` for an in-depth description of how to set up this component of the pipeline.
 
@@ -102,10 +104,12 @@ This Python-scripted Docker container is orchestrated to securely download and m
 
 All files will be stored within the `dvc_store/` folder on the bucket, while preserving directory structure from the original repositories from which they were extracted.
 
-#### 4. LLM Fine-tuning
+#### 5. LLM Fine-tuning
 
-For a future milestone.
+See `src/training/README.md` for an in-depth description of how to set up this component of the pipeline.
 
-#### 5. Model Deployment
+At this stage, we will be taking our labeled data (which are now pairs of prompts and code snippets) and use it to fine-tune a pre-trained LLM available on HuggingFace. Note that before inputting our data to a model, we would first set up a PyTorch custom data class to facilitate efficient data ingestion. This custom data class would also be used to slightly modify the structure of our labeled data so that it would satisfy the format of a pre-trained LLM. We arbitrarily chose a relatively small pre-trained model `DistilGPT2` to facilitate rapid testing. Eventually, we will be replacing it with a more robust model, which would consume more intense computing resources.
 
-Also for a future milestone.
+#### 6. Model Deployment
+
+To be implemented in a future milestone.

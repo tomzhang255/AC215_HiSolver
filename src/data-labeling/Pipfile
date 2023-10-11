@@ -7,9 +7,8 @@ verify_ssl = true
 
 [packages]
 google-cloud-storage = "*"
+label-studio-sdk = "*"
 pandas = "*"
-dvc = "*"
-dvc-gs = "*"
 
 [requires]
 python_version = "3.8"
