@@ -126,3 +126,9 @@ docker-compose run --rm --service-ports hisolver-data-label-cli
 ```shell
 docker stop hisolver-data-label-studio
 ```
+
+6. Prune dangling images
+
+```shell
+docker image prune
+```

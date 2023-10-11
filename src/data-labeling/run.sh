@@ -11,3 +11,6 @@ docker-compose run --rm --service-ports hisolver-data-label-cli
 
 # Once the shell is exited, stop the specified container
 docker stop hisolver-data-label-studio
+
+# Prune dangling images
+docker image prune
