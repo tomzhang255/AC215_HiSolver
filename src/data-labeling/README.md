@@ -130,5 +130,5 @@ docker stop hisolver-data-label-studio
 6. Prune dangling images
 
 ```shell
-docker image prune
+yes | docker image prune
 ```
