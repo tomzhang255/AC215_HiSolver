@@ -1,27 +1,21 @@
-copy secrets from training folder
-
-./run.sh
-
-type Y at some point after container starts running
-
 ## serving pytorch model with pre-trained container to vertex ai
 
-### Package the model artifacts in a model archive file
+copy secrets from training folder
 
-pip install torch-model-archiver
+in gcp console: copy serice account email - in IAM page, add role "AI Platform Admin" to service account email principal
 
-create mar/
+be in the deployment/ dir, to build and run a docker container, a shell will be launch at the end:
 
 ```shell
-torch-model-archiver -f \
-    --model-name model \
-    --version 1.0  \
-    --serialized-file ./model.py \
-    --handler custom_handler.py \
-    --export-path mar/ \
-    --extra-files extra/config.json,extra/tokenizer.json,extra/vocab.json,extra/generation_config.json,extra/generation_config_for_text_generation.json
+./run.sh
 ```
 
-### Copy the model artifacts to Cloud Storage
+in the docker shell:
 
-copy serice account email - in IAM page, add role "AI Platform Admin" to service account email principal
+```shell
+python cli.py --upload
+```
+
+```shell
+python cli.py --deploy
+```

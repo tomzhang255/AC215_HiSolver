@@ -22,92 +22,84 @@ import torch
 
 GCP_PROJECT = os.environ.get("GCP_PROJECT")
 GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
-MODEL_NAME = 'best_model'
-MODEL_DIR = f'models/{MODEL_NAME}'
-ARTIFACT_URI = f"gs://{GCS_BUCKET_NAME}/{MODEL_DIR}"
+MODEL_NAME = 'pytorch_model'
+MODEL_URI = f"gs://{GCS_BUCKET_NAME}/{MODEL_NAME}"
+REGION = 'us-east4'
 
 
 def main(args=None):
     if args.upload:
         print("Upload model to GCS")
 
-        model = GPT2LMHeadModel.from_pretrained('distilgpt2')
+        # download a pre-trained model
+        model_path = "model"  # where to locally store the download
+        os.system(f'rm -r {model_path}')
+        os.system(f'mkdir {model_path}')
+
         tokenizer = GPT2Tokenizer.from_pretrained('distilgpt2')
+        model = GPT2LMHeadModel.from_pretrained('distilgpt2')
 
-        os.makedirs(MODEL_DIR, exist_ok=True)
-        model.save_pretrained(MODEL_DIR)
-        tokenizer.save_pretrained(MODEL_DIR)
+        tokenizer.save_pretrained(model_path)
+        model.save_pretrained(model_path)
 
-        def upload_model_to_gcs(local_model_dir, bucket_name, model_name):
-            storage_client = storage.Client(project=GCP_PROJECT)
-            bucket = storage_client.get_bucket(bucket_name)
-            local_files = [f for f in glob.glob(
-                f"{local_model_dir}/**", recursive=True) if os.path.isfile(f)]
-            for local_file in local_files:
-                remote_path = os.path.join(
-                    model_name, os.path.relpath(local_file, local_model_dir))
-                blob = bucket.blob(remote_path)
-                blob.upload_from_filename(local_file)
+        os.system(
+            f'mv {model_path}/pytorch_model.bin {model_path}/{MODEL_NAME}.bin')
+        model_file = f"{model_path}/{MODEL_NAME}.bin"
 
-        upload_model_to_gcs(MODEL_DIR, GCS_BUCKET_NAME, MODEL_NAME)
+        # Add torch-model-archiver to the PATH
+        os.environ["PATH"] = f'{os.environ.get("PATH")}:~/.local/bin'
+
+        # Package the model artifacts in a model archive file
+        os.system(f"""
+                    torch-model-archiver -f \
+                        --model-name model \
+                        --version 1.0  \
+                        --serialized-file {model_file} \
+                        --handler custom_handler.py \
+                        --extra-files model/config.json,model/vocab.json,model/generation_config.json \
+                        --export-path {model_path}
+                    """)
+
+        # Copy the model artifacts to Cloud Storage
+        os.system(f"""
+                    gsutil rm -r {MODEL_URI}
+                    gsutil cp -r {model_path} {MODEL_URI}
+                    gsutil ls -al {MODEL_URI}
+                    """)
 
         print(
             f'Model {MODEL_NAME} has been uploaded to GCS bucket {GCS_BUCKET_NAME}.')
 
     elif args.deploy:
-        # init vertex ai sdk
-        # aiplatform.init(project=GCP_PROJECT, location='us-east4', staging_bucket=f'gs://{GCS_BUCKET_NAME}')
+        # init vertex ai resource
+        aiplatform.init(project=GCP_PROJECT, location=REGION,
+                        staging_bucket=MODEL_URI)
 
-        # Create a TorchServe inference handler.
-        def handler(data):
-            # Process the input data.
-            tokenizer = GPT2Tokenizer.from_pretrained(ARTIFACT_URI)
-            input_ids = tokenizer.encode(data)
+        DEPLOY_IMAGE_URI = "us-docker.pkg.dev/vertex-ai/prediction/pytorch-cpu.1-11:latest"
 
-            # Run the model inference.
-            model = GPT2LMHeadModel.from_pretrained(ARTIFACT_URI)
-            outputs = model(input_ids=torch.tensor(input_ids))
-            generated_ids = outputs.logits.argmax(dim=-1)
-
-            # Post-process the output data.
-            output = tokenizer.decode(generated_ids.tolist())
-
-            return output
-
-        # Create a TorchServe model config.
-        model_config = torchserve.ModelConfig(
-            name=MODEL_NAME,
-            handler=handler,
-            model_path=ARTIFACT_URI,
-            runtime="pytorch",
-        )
-
-
-        # us-docker.pkg.dev/vertex-ai/prediction/pytorch-cpu.2-0:latest
-
-
-
-
-        # Create a Vertex AI Model resource.
-        aiplatform.init()
-        model = aiplatform.Model.create(
-            project_id=GCP_PROJECT,
-            region="us-east4",
+        # upload model for deployment
+        deployed_model = aiplatform.Model.upload(
             display_name=MODEL_NAME,
-            framework="pytorch",
-            model_config=model_config,
+            serving_container_image_uri=DEPLOY_IMAGE_URI,
+            artifact_uri=MODEL_URI,
         )
 
-        # Deploy the model to a Vertex AI endpoint.
-        endpoint = model.deploy(endpoint_name=f"{MODEL_NAME}-endpoint")
+        # deploy model for prediction
+        print('Deploying model...')
+        print('This will take a few minutes...')
 
+        DEPLOY_COMPUTE = "n1-standard-4"
+
+        endpoint = deployed_model.deploy(
+            deployed_model_display_name=MODEL_NAME,
+            machine_type=DEPLOY_COMPUTE,
+            accelerator_type=None,
+            accelerator_count=0,
+        )
+
+        print('Model deployed!')
+        print('Endpoint:')
         print(endpoint)
-
-        # Send a prediction request to the endpoint.
-        response = endpoint.predict(data="Hello, world!")
-
-        # Print the prediction response.
-        print(response)
 
     elif args.predict:
         print("Predict using endpoint")
