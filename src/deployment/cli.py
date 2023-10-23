@@ -10,12 +10,14 @@ Typical usage example from command line:
 import os
 import argparse
 import glob
+import base64
 import json
-import requests
+import pathlib
+import urllib.request
 
-from google.cloud import storage
-from google.cloud import aiplatform
-from transformers import TFGPT2LMHeadModel, GPT2Tokenizer
+from google.cloud import storage, aiplatform
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
+import torch
 
 
 GCP_PROJECT = os.environ.get("GCP_PROJECT")
@@ -29,9 +31,8 @@ def main(args=None):
     if args.upload:
         print("Upload model to GCS")
 
-        model_name = 'distilgpt2'
-        model = TFGPT2LMHeadModel.from_pretrained(model_name)
-        tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+        model = GPT2LMHeadModel.from_pretrained('distilgpt2')
+        tokenizer = GPT2Tokenizer.from_pretrained('distilgpt2')
 
         os.makedirs(MODEL_DIR, exist_ok=True)
         model.save_pretrained(MODEL_DIR)
@@ -48,75 +49,68 @@ def main(args=None):
                 blob = bucket.blob(remote_path)
                 blob.upload_from_filename(local_file)
 
-        upload_model_to_gcs(MODEL_DIR, GCS_BUCKET_NAME, model_name)
+        upload_model_to_gcs(MODEL_DIR, GCS_BUCKET_NAME, MODEL_NAME)
 
         print(
-            f'Model {model_name} has been uploaded to GCS bucket {GCS_BUCKET_NAME}.')
+            f'Model {MODEL_NAME} has been uploaded to GCS bucket {GCS_BUCKET_NAME}.')
 
     elif args.deploy:
-        print("Deploy model")
+        # init vertex ai sdk
+        # aiplatform.init(project=GCP_PROJECT, location='us-east4', staging_bucket=f'gs://{GCS_BUCKET_NAME}')
 
-        def deploy_model(gcs_model_path, project, location='us-east4'):
-            aiplatform.init(project=project, location=location)
+        # Create a TorchServe inference handler.
+        def handler(data):
+            # Process the input data.
+            tokenizer = GPT2Tokenizer.from_pretrained(ARTIFACT_URI)
+            input_ids = tokenizer.encode(data)
 
-            model = aiplatform.Model.upload(
-                display_name='distilgpt2-tf',
-                artifact_uri=gcs_model_path,
-                serving_container_image_uri='us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-3:latest',
-            )
+            # Run the model inference.
+            model = GPT2LMHeadModel.from_pretrained(ARTIFACT_URI)
+            outputs = model(input_ids=torch.tensor(input_ids))
+            generated_ids = outputs.logits.argmax(dim=-1)
 
-            deployed_model = model.deploy(
-                machine_type='n1-standard-4',
-            )
-            return deployed_model.endpoint
+            # Post-process the output data.
+            output = tokenizer.decode(generated_ids.tolist())
 
-        endpoint = deploy_model(ARTIFACT_URI, GCP_PROJECT)
-        print(f'Model deployed at: {endpoint}')
+            return output
 
+        # Create a TorchServe model config.
+        model_config = torchserve.ModelConfig(
+            name=MODEL_NAME,
+            handler=handler,
+            model_path=ARTIFACT_URI,
+            runtime="pytorch",
+        )
+
+
+        # us-docker.pkg.dev/vertex-ai/prediction/pytorch-cpu.2-0:latest
+
+
+
+
+        # Create a Vertex AI Model resource.
+        aiplatform.init()
+        model = aiplatform.Model.create(
+            project_id=GCP_PROJECT,
+            region="us-east4",
+            display_name=MODEL_NAME,
+            framework="pytorch",
+            model_config=model_config,
+        )
+
+        # Deploy the model to a Vertex AI endpoint.
+        endpoint = model.deploy(endpoint_name=f"{MODEL_NAME}-endpoint")
+
+        print(endpoint)
+
+        # Send a prediction request to the endpoint.
         response = endpoint.predict(data="Hello, world!")
-        print(f'Response: {response}')
+
+        # Print the prediction response.
+        print(response)
 
     elif args.predict:
         print("Predict using endpoint")
-
-        # Assume endpoint is set up
-        endpoint = "https://your-vertex-ai-endpoint-url"
-        input_text = "Your input text here"
-
-        def make_prediction(endpoint, input_text):
-            # Prepare the request body
-            request_body = {
-                "instances": [{"input_text": input_text}]
-            }
-
-            # Send the prediction request
-            response = requests.post(
-                endpoint,
-                headers={"Content-Type": "application/json"},
-                data=json.dumps(request_body)
-            )
-
-            # Check for a valid response
-            if response.status_code == 200:
-                # Parse the prediction results
-                prediction_results = response.json()
-                predictions = prediction_results.get("predictions", [])
-                if predictions:
-                    # Assume the first prediction is the most relevant
-                    output_text = predictions[0]
-                    return output_text
-            else:
-                print(
-                    f"Failed to get a valid response. Status code: {response.status_code}")
-                print(f"Response content: {response.content}")
-
-            return None
-
-        output_text = make_prediction(endpoint, input_text)
-        if output_text:
-            print(f"Output text: {output_text}")
-        else:
-            print("Failed to get a prediction")
 
 
 if __name__ == "__main__":
