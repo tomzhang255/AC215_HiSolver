@@ -8,7 +8,6 @@ verify_ssl = true
 [packages]
 google-cloud-storage = "*"
 label-studio-sdk = "*"
-pandas = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

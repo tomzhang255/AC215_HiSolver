@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 networks:
   default:
     name: hisolver-data-labeling-network
@@ -8,12 +8,12 @@ services:
     image: hisolver-data-label-cli
     container_name: hisolver-data-label-cli
     env_file:
-      - secrets/data-labeling.env
+      - ../../secrets/data-labeling.env
     volumes:
-      - ./secrets:/secrets
+      - ../../secrets:/secrets
       - ../data-labeling:/app
     environment:
-      GOOGLE_APPLICATION_CREDENTIALS: /secrets/hisolver-data-collection-secrets.json
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/data-service-account.json
       GCP_ZONE: "us-central1-a"
       LABEL_STUDIO_URL: "http://data-label-studio:8080"
     depends_on:
@@ -22,13 +22,13 @@ services:
     image: heartexlabs/label-studio:latest
     container_name: hisolver-data-label-studio
     env_file:
-      - secrets/data-labeling.env
+      - ../../secrets/data-labeling.env
     ports:
       - 8080:8080
     volumes:
       - ./docker-volumes/label-studio:/label-studio/data
-      - ./secrets:/secrets
+      - ../../secrets:/secrets
     environment:
       LABEL_STUDIO_DISABLE_SIGNUP_WITHOUT_LINK: "true"
-      GOOGLE_APPLICATION_CREDENTIALS: /secrets/hisolver-data-collection-secrets.json
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/data-service-account.json
       GCP_ZONE: "us-central1-a"
