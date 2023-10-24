@@ -39,7 +39,11 @@
 5. Make sure to copy the token string immediately; this is the only time you'll see it
 6. Paste it in a file named `pat.txt` in the previous `secrets` folder (make sure the file lives in `secrets/pat.txt` within the repo)
 
-## IV. Run data collection script in a docker contianer
+## IV. More secrets [One time]
+
+1. While you're at it, also put the GCP project ID into a secret file. Make sure it resides in `secrets/gcp_project_id.txt`
+
+## V. Run data collection script in a docker contianer
 
 1. Start a Docker daemon (i.e., open up Docker Desktop)
 
