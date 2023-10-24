@@ -9,8 +9,8 @@
 5. Give it a name: `hisolver-data-collection`
 6. Use default settings
 7. Once you've created the service account, open it, go to the `KEYS` tab, create a new key of the JSON type.
-8. Download the JSON file, rename it to `hisolver-data-collection-secrets.json`
-9. Move it to this location of the repo: `src/collection/secrets/` (you might need to create a `secrets` folder)
+8. Download the JSON file, rename it to `data-service-account.json`
+9. Create a `secrets` folder at the **_root_** of this repo; move the file into it. Make sure it resides in `secrets/data-service-account.json`
 
 ## II. Set up a GCP cloud storage bucket [One time]
 
@@ -21,7 +21,7 @@
 5. Name the bucket `hisolver-data-collection`; if the name's taken, just add a `-1` or something
 6. Use default settings
 7. Finish creating the bucket
-8. Copy the name of your bucket and paste it in a file called `gcs_bucket_name.txt`; the file should live in the previous `secrets` folder; make sure the file exists within this path of the repo: `src/collection/secrets/gcs_bucket_name.txt`
+8. Copy the name of your bucket and paste it in a file called `gcs_bucket_name.txt`; the file should live in the previous `secrets` folder; make sure the file exists within this path of the repo: `secrets/gcs_bucket_name.txt`
 9. Go back to `Service Accounts` page, open up the service account you just created (you named it `hisolver-data-collection`)
 10. Under the `DETAILS` tab, find the service account's email. It should look something like `hisolver-data-collection@[your-project-name].iam.gserviceaccount.com`. Copy the email.
 11. Go back to `Buckets` page, find the bucket you just created (you named it `hisolver-data-collection`)
@@ -37,7 +37,7 @@
 3. Select `Generate new token` -> `Generate new token (classic)`
 4. Give it any name; set expiration to "No expiration"; generate token
 5. Make sure to copy the token string immediately; this is the only time you'll see it
-6. Paste it in a file named `pat.txt` in the previous `secrets` folder (make sure the file lives in `src/collection/secrets/path.txt` within the repo)
+6. Paste it in a file named `pat.txt` in the previous `secrets` folder (make sure the file lives in `secrets/pat.txt` within the repo)
 
 ## IV. Run data collection script in a docker contianer
 
@@ -45,22 +45,10 @@
 
 2. Traverse to the correct directory: `src/collection/`
 
-3. Run the following:
+3. Run the following to build and run a docker container: `./docker-shell.sh`
 
-```shell
-# Remove all containers built from this image if such containers exist
-docker ps -a --filter "ancestor=hisolver-manim-collection" -q | xargs docker stop && docker ps -a --filter "ancestor=hisolver-manim-collection" -q | xargs docker rm
+4. Once the container starts running, it should launch a shell prompt; in it, run `python collect.py` to start the collection script
 
-# Remove image if it exists
-docker images | grep -q "hisolver-manim-collection" && docker rmi hisolver-manim-collection
+5. The collection script should be running; if you go to your bucket page again on GCP, you should see the bucket being populated with scraped Python files in the `raw/` folder
 
-# Build docker image
-docker build -t hisolver-manim-collection .
-
-# Run collection script in container
-docker run -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json -e GITHUB_PAT=$(cat secrets/pat.txt) -e GCS_BUCKET_NAME=$(cat secrets/gcs_bucket_name.txt) hisolver-manim-collection
-```
-
-4. The collection script should be running; if you go to your bucket page again on GCP, you should see the bucket being populated with scraped Python files in the `raw/` folder
-
-5. In case you need to rebuild the container, just rerun step 3
+6. In case you need to rebuild the container, just rerun step 3
