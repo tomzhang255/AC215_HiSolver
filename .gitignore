@@ -140,6 +140,9 @@ dmypy.json
 
 # .git in dvc container
 src/data-versioning/.git/
+src/preprocessing/.git/
+src/preprocessing/.dvc/
+src/preprocessing/.gitconfig
 
 #processed_dataset
 **/processed_dataset/
