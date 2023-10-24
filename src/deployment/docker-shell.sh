@@ -4,7 +4,7 @@ set -e
 
 export IMAGE_NAME=model-deployment-cli
 export BASE_DIR=$(pwd)
-export SECRETS_DIR=$(pwd)/secrets/
+export SECRETS_DIR=$(pwd)/../../secrets/
 export GCP_PROJECT=$(cat $SECRETS_DIR/gcp_project_id.txt)
 export GCS_BUCKET_NAME=$(cat $SECRETS_DIR/gcs_bucket_name.txt)
 
@@ -18,7 +18,7 @@ docker build -t $IMAGE_NAME --platform=linux/arm64/v8 -f Dockerfile .
 docker run --rm --name $IMAGE_NAME -ti \
 -v "$BASE_DIR":/app \
 -v "$SECRETS_DIR":/secrets \
--e GOOGLE_APPLICATION_CREDENTIALS=/secrets/hisolver-data-collection-secrets.json \
+-e GOOGLE_APPLICATION_CREDENTIALS=/secrets/data-service-account.json \
 -e GCP_PROJECT=$GCP_PROJECT \
 -e GCS_BUCKET_NAME=$GCS_BUCKET_NAME \
 $IMAGE_NAME
