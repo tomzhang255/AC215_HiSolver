@@ -18,13 +18,13 @@
 2. From the sidebar, select `Cloud Storage` -> `Buckets`
 3. Make sure to select the project you just created a service account for
 4. On the `Buckets` page, click `Create`
-5. Name the bucket `hisolver-data-collection`; if the name's taken, just add a `-1` or something
-6. Use default settings
+5. Name the bucket `hisolver-manim`; if the name's taken, just add a `-1` or something
+6. Use default settings - except for region, it has to be `us-east4`; cannot be multi-region
 7. Finish creating the bucket
 8. Copy the name of your bucket and paste it in a file called `gcs_bucket_name.txt`; the file should live in the previous `secrets` folder; make sure the file exists within this path of the repo: `secrets/gcs_bucket_name.txt`
-9. Go back to `Service Accounts` page, open up the service account you just created (you named it `hisolver-data-collection`)
-10. Under the `DETAILS` tab, find the service account's email. It should look something like `hisolver-data-collection@[your-project-name].iam.gserviceaccount.com`. Copy the email.
-11. Go back to `Buckets` page, find the bucket you just created (you named it `hisolver-data-collection`)
+9. Go back to `Service Accounts` page, open up the service account you just created (you named it `hisolver-manim`)
+10. Under the `DETAILS` tab, find the service account's email. It should look something like `hisolver-manim@[your-project-name].iam.gserviceaccount.com`. Copy the email.
+11. Go back to `Buckets` page, find the bucket you just created (you named it `hisolver-manim`)
 12. Go to the `PERMISSIONS` tab
 13. Select `VIEW BY PRINCIPALS` -> `GRANT ACCESS`
 14. Paste the service account email you just copied to the `New principals` field
@@ -56,3 +56,29 @@
 5. The collection script should be running; if you go to your bucket page again on GCP, you should see the bucket being populated with scraped Python files in the `raw/` folder
 
 6. In case you need to rebuild the container, just rerun step 3
+
+## VI. Push image to docker hub
+
+1. Sign up in Docker Hub and create an [Access Token](https://hub.docker.com/settings/security)
+
+2. Record your access token in `secrets/docker_hub_token.txt`
+
+3. Record your username in `secrets/docker_hub_username.txt`
+
+4. Login to the hub:
+
+```shell
+docker login -u $(cat ../../secrets/docker_hub_username.txt) -p $(cat ../../secrets/docker_hub_token.txt)
+```
+
+5. Build and tag the image:
+
+```shell
+docker build -t $(cat ../../secrets/docker_hub_username.txt)/hisolver-manim-data-collector --platform=linux/amd64/v2 -f Dockerfile .
+```
+
+6. Push to docker hub:
+
+```shell
+docker push $(cat ../../secrets/docker_hub_username.txt)/hisolver-manim-data-collector
+```

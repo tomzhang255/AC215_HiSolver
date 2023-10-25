@@ -1,0 +1,42 @@
+# PIPELINE DEFINITION
+# Name: ml-pipeline
+components:
+  comp-data-collector:
+    executorLabel: exec-data-collector
+  comp-data-processor:
+    executorLabel: exec-data-processor
+deploymentSpec:
+  executors:
+    exec-data-collector:
+      container:
+        args:
+        - collect.py
+        image: tomzhang777/hisolver-manim-data-collector
+    exec-data-processor:
+      container:
+        args:
+        - preprocess.py
+        image: tomzhang777/hisolver-manim-data-processor
+pipelineInfo:
+  name: ml-pipeline
+root:
+  dag:
+    tasks:
+      data-collector:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-data-collector
+        taskInfo:
+          name: Data Collector
+      data-processor:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-data-processor
+        dependentTasks:
+        - data-collector
+        taskInfo:
+          name: Data Processor
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.3.0

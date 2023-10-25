@@ -17,3 +17,23 @@ Make sure you've followed all the steps from the data collection section `src/co
 5. The pre-processing script should be running; if you go to your bucket page again on GCP, you should see the bucket being populated with processed JSON files in the `processed/` folder
 
 6. In case you need to rebuild the container, just rerun step 3
+
+## III. Push image to docker hub
+
+1. Login to the hub:
+
+```shell
+docker login -u $(cat ../../secrets/docker_hub_username.txt) -p $(cat ../../secrets/docker_hub_token.txt)
+```
+
+2. Build and tag the image:
+
+```shell
+docker build -t $(cat ../../secrets/docker_hub_username.txt)/hisolver-manim-data-processor --platform=linux/amd64/v2 -f Dockerfile .
+```
+
+3. Push to docker hub:
+
+```shell
+docker push $(cat ../../secrets/docker_hub_username.txt)/hisolver-manim-data-processor
+```

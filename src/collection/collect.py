@@ -72,12 +72,8 @@ def main():
     because each API response only gives max 100 items.
     """
 
-    # print(os.environ.get("GITHUB_PAT"))
-    # print(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"))
-    # with open("secrets/hisolver-data-collection-secrets.json") as f:
-    #     print(f.read())
-
     page = 1
+    repos = 0
 
     # simple API call pagination mechanism
     while True:
@@ -103,6 +99,11 @@ def main():
             for file_url, file_path in python_files:
                 # save each python file to GCP bucket
                 save_to_gcs(file_url, file_path, GCS_BUCKET_NAME)
+
+            # FIXME for now just collect 3 repos for testing purposes
+            repos += 1
+            if repos == 3:
+                break
 
         print(f"--- Page: {page} done ---")
         page += 1
