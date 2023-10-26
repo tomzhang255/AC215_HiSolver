@@ -21,6 +21,7 @@ PIPELINE_ROOT = f"{BUCKET_URI}/pipeline_root/root"
 GCS_SERVICE_ACCOUNT = os.environ["GCS_SERVICE_ACCOUNT"]
 GCS_PACKAGE_URI = os.environ["GCS_PACKAGE_URI"]
 GCP_REGION = os.environ["GCP_REGION"]
+GITHUB_PAT = os.environ['GITHUB_PAT']
 DOCKER_HUB_USERNAME = os.environ['DOCKER_HUB_USERNAME']
 
 # DATA_COLLECTOR_IMAGE = "gcr.io/ac215-project/mushroom-app-data-collector"
@@ -43,7 +44,9 @@ def main(args=None):
                 image=DATA_COLLECTOR_IMAGE,
                 command=[],
                 args=[
-                    "collect.py"
+                    "collect.py",
+                    f"--bucket {GCS_BUCKET_NAME}",
+                    f"--pat {GITHUB_PAT}"
                 ],
             )
             return container_spec
@@ -55,7 +58,9 @@ def main(args=None):
                 image=DATA_PROCESSOR_IMAGE,
                 command=[],
                 args=[
-                    "preprocess.py"
+                    "preprocess.py",
+                    f"--bucket {GCS_BUCKET_NAME}",
+                    f"--dvc {'FIXME-dvc-remote-name'}"
                 ],
             )
             return container_spec
@@ -76,7 +81,8 @@ def main(args=None):
         compiler.Compiler().compile(ml_pipeline, package_path="pipeline1.yaml")
 
         # Submit job to Vertex AI
-        aip.init(project=GCP_PROJECT, location=GCP_REGION, staging_bucket=BUCKET_URI)
+        aip.init(project=GCP_PROJECT, location=GCP_REGION,
+                 staging_bucket=BUCKET_URI)
 
         job_id = generate_uuid()
         DISPLAY_NAME = "hisolver-manim-pipeline-data-" + job_id
