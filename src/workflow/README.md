@@ -1,5 +1,7 @@
 ## prep
 
+make sure you've followed all the steps from the previous sections
+
 in secrets folder: add - gcs_service_account.txt
 
 on gcp console - add service account as "service account user"
@@ -22,7 +24,9 @@ pipeline 2: model training -> model deployment
 python cli.py --pipeline1
 ```
 
-do label studio stuff... then:
+once you see "PipelineState.PIPELINE_STATE_RUNNING" that means the pipeline has been deployed and is running; you can safely quit the docker shell and check on gcp console.
+
+wait til the pipeline finishes, then do label studio stuff... then:
 
 ```shell
 python cli.py --pipeline2

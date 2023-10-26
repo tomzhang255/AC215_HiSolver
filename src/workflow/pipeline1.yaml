@@ -19,7 +19,7 @@ deploymentSpec:
         args:
         - preprocess.py
         - --bucket hisolver-manim
-        - --dvc FIXME dvc remote name
+        - --dvc FIXME-dvc-remote-name
         image: tomzhang777/hisolver-manim-data-processor
 pipelineInfo:
   name: ml-pipeline
