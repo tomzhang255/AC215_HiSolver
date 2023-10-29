@@ -48,8 +48,8 @@
             |── training
             |     ├── README.md
             |     ├── Dockerfile
-            |     ├── training.py
-            |     └── requirements.txt
+            |     ├── run.sh
+            |     └── train.py
             └── deployment
             │     ├── README.md
             │     ├── Dockerfile
@@ -129,6 +129,8 @@ The figure below illustrates what the Label Studio UI looks like. In particular,
 See `src/training/README.md` for an in-depth description of how to set up this component of the pipeline.
 
 At this stage, we will be taking our labeled data (which are now pairs of prompts and code snippets) and use it to fine-tune a pre-trained LLM available on HuggingFace. Note that before inputting our data to a model, we would first set up a PyTorch custom data class to facilitate efficient data ingestion. This custom data class would also be used to slightly modify the structure of our labeled data so that it would satisfy the format of a pre-trained LLM. We arbitrarily chose a relatively small pre-trained model `DistilGPT2` to facilitate rapid testing. We were also able to optimize the fine-tuning process further by quantizing it. Eventually, we will be replacing the base model with a more robust one, which would consume more computing resources.
+
+![Serverless training](./assets/images/serverless-training.png)
 
 #### 6. Model Deployment
 
