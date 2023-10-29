@@ -31,15 +31,10 @@ def model_deployer(
             blob.download_to_filename(destination_file_name)
             print(f'Downloaded {blob.name} to {destination_file_name}')
 
-    def main(args=None):
+    def main():
         # Constants
-        GCP_PROJECT = os.environ.get("GCP_PROJECT")
-        if args.project != "":
-            GCP_PROJECT = args.project
-
-        GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
-        if args.bucket != "":
-            GCS_BUCKET_NAME = args.bucket
+        GCP_PROJECT = project_name
+        GCS_BUCKET_NAME = bucket_name
 
         MODEL_NAME = 'pytorch_model'
         MODEL_URI = f"gs://{GCS_BUCKET_NAME}/{MODEL_NAME}"
