@@ -44,7 +44,7 @@ python cli.py --pipeline1
    - You should be able to see a list of all the pipelines you have
    - Click on the one you just deployed to see its progress
 
-5. Wait til the pipeline finishes running; note that the first pipeline we just run is for data collection and preprocessing only; the second pipeline will be run after we've labeled some data
+5. Wait til the pipeline finishes running (it should take less than 15 minutes); note that the first pipeline we just run is for data collection and preprocessing only; the second pipeline will be run after we've labeled some data
 
 6. In the terminal, navigate to `src/data-labeling/`; follow the instructions in `README.md` to label some data
 
@@ -58,4 +58,4 @@ python cli.py --pipeline2
 
 9. Again, once you see `PipelineState.PIPELINE_STATE_RUNNING` - that means the pipeline has been deployed and is running; you can safely terminate the python script and quit the docker shell this time
 
-10. Check the pipeline's progress on GCP console
+10. Check the pipeline's progress on GCP console; it should take less than 20 minutes to finish
