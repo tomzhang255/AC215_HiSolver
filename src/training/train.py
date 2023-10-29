@@ -3,9 +3,6 @@ import json
 import argparse
 from datetime import datetime
 
-# a problem with the latest version of torch - cublaslib does not exist; using a previous version
-os.system('pip install "torch==2.0.0"')
-
 from google.cloud import storage
 from torch.utils.data import Dataset
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments

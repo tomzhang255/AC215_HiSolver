@@ -21,4 +21,5 @@ RUN echo "export GCS_BUCKET_NAME=$(cat /secrets/gcs_bucket_name.txt)" >> /etc/en
 ENV GOOGLE_APPLICATION_CREDENTIALS=/secrets/data-serivce-account.json
 
 # Set the entrypoint to run the script
-ENTRYPOINT ["python", "train.py"]
+# ENTRYPOINT ["python", "train.py", "--bucket ($cat /secrets/gcs_bucket_name.txt)"]
+ENTRYPOINT python train.py --bucket $(cat /secrets/gcs_bucket_name.txt)

@@ -28,51 +28,17 @@ Make sure you've followed all the steps from the data pre-processing section `sr
 
 4. In `src/training/secrets/` create a file named `gcp_project_id.txt` and put the GCP Project ID that you've been using in it
 
-5. Build docker image for training:
+5. Submit custom job to Vertex AI for serverless training:
 
 ```shell
-# Remove all containers built from this image if such containers exist
-docker ps -a --filter "ancestor=hisolver-manim-training" -q | xargs docker stop && docker ps -a --filter "ancestor=hisolver-manim-training" -q | xargs docker rm
-
-# Remove image if it exists
-docker images | grep -q "hisolver-manim-training" && docker rmi hisolver-manim-training
-
-# Build docker image
-docker build -t hisolver-manim-training .
+./serverless.sh
 ```
 
-6. Tag image:
-
-```shell
-docker tag hisolver-manim-training gcr.io/$(cat secrets/gcp_project_id.txt)/hisolver-manim-training:latest
-```
-
-7. Authenticate with GCP:
-
-```shell
-gcloud auth activate-service-account --key-file secrets/data-service-account.json
-```
-
-8. Push image to container registry
-
-```shell
-gcloud auth configure-docker
-docker push gcr.io/$(cat secrets/gcp_project_id.txt)/hisolver-manim-training:latest
-```
-
-9. Submit training job to vertex ai
-
-```shell
-gcloud ai custom-jobs create \
-  --region=us-east4 \
-  --display-name=hisolver-manim-training-job \
-  --worker-pool-spec=machine-type=e2-standard-4,replica-count=1,container-image-uri=gcr.io/$(cat secrets/gcp_project_id.txt)/hisolver-manim-training:latest
-```
-
-10. To monitor training status:
+6. To monitor training status:
 
 - On the GCP console -> search for "Vertex AI" with the search bar
 - On the Vertex AI page -> look at the sidebar -> look for the "MODEL DEVELOPMENT" section -> select "Training"
 - On the Training page -> select region "us-east4" as we previously specified in the above command
 - Go to the "CUSTOM JOBS" tab
 - You should then see your job named: "hisolver-manim-training-job"
+- After the job is done running, you should see a new folder `fine_tuned_model` in your GCS bucket
