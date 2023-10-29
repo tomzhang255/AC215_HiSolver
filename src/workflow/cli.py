@@ -12,7 +12,8 @@ import string
 from kfp import dsl, compiler
 import google.cloud.aiplatform as aip
 
-from model import model_trainer
+from train import model_trainer
+from deploy import model_deployer
 
 
 GCP_PROJECT = os.environ["GCP_PROJECT"]
@@ -100,42 +101,18 @@ def main(args=None):
         job.run(service_account=GCS_SERVICE_ACCOUNT)
 
     if args.pipeline2:
-        # Define a Container Component for model fine-tuning
-        # @dsl.container_component
-        # def model_trainer():
-        #     container_spec = dsl.ContainerSpec(
-        #         image=MODEL_TRAINER_IMAGE,
-        #         command=[],
-        #         args=[
-        #             "train.py",
-        #             f"--bucket {GCS_BUCKET_NAME}"
-        #         ],
-        #     )
-        #     return container_spec
-
-        # Define a Container Component for model deployment
-        @dsl.container_component
-        def model_deployer():
-            container_spec = dsl.ContainerSpec(
-                image=MODEL_DEPLOYER_IMAGE,
-                command=[],
-                args=[
-                    "deploy.py",
-                    f"--bucket {GCS_BUCKET_NAME}",
-                    f"--project {GCP_PROJECT}"
-                ],
-            )
-            return container_spec
-
         # Define a Pipeline
         @dsl.pipeline
         def hisolver_manim_pipeline_model():
             # Model Trainer
-            model_trainer_task = model_trainer(
-                bucket_name=GCS_BUCKET_NAME).set_display_name("Model Trainer")
+            model_trainer_task = (
+                model_trainer(bucket_name=GCS_BUCKET_NAME)
+                .set_display_name("Model Trainer")
+            )
             # Model Deployer
             model_deployer_task = (
-                model_deployer()
+                model_deployer(project_name=GCP_PROJECT,
+                               bucket_name=GCS_BUCKET_NAME)
                 .set_display_name("Model Deployer")
                 .after(model_trainer_task)
             )

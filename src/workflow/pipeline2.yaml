@@ -3,6 +3,16 @@
 components:
   comp-model-deployer:
     executorLabel: exec-model-deployer
+    inputDefinitions:
+      parameters:
+        bucket_name:
+          defaultValue: ''
+          isOptional: true
+          parameterType: STRING
+        project_name:
+          defaultValue: ''
+          isOptional: true
+          parameterType: STRING
   comp-model-trainer:
     executorLabel: exec-model-trainer
     inputDefinitions:
@@ -16,10 +26,84 @@ deploymentSpec:
     exec-model-deployer:
       container:
         args:
-        - deploy.py
-        - --bucket hisolver-manim
-        - --project tom-zhang-0
-        image: tomzhang777/hisolver-manim-model-deployer
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - model_deployer
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.3.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'google-cloud-aiplatform'\
+          \ 'google-cloud-storage' 'transformers' 'torch' 'torch-model-archiver' 'packaging'\
+          \ && \"$0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef model_deployer(\n    project_name: str = \"\",\n    bucket_name:\
+          \ str = \"\"\n):\n    print(\"Model Deployment\")\n\n    import os\n\n \
+          \   from google.cloud import storage, aiplatform\n\n    def download_directory(bucket_name,\
+          \ source_dir_prefix):\n        storage_client = storage.Client()\n     \
+          \   bucket = storage_client.bucket(bucket_name)\n\n        blobs = bucket.list_blobs(prefix=source_dir_prefix)\n\
+          \        for blob in blobs:\n            destination_file_name = blob.name\n\
+          \            os.makedirs(os.path.dirname(destination_file_name), exist_ok=True)\n\
+          \            blob.download_to_filename(destination_file_name)\n        \
+          \    print(f'Downloaded {blob.name} to {destination_file_name}')\n\n   \
+          \ def main(args=None):\n        # Constants\n        GCP_PROJECT = os.environ.get(\"\
+          GCP_PROJECT\")\n        if args.project != \"\":\n            GCP_PROJECT\
+          \ = args.project\n\n        GCS_BUCKET_NAME = os.environ.get(\"GCS_BUCKET_NAME\"\
+          )\n        if args.bucket != \"\":\n            GCS_BUCKET_NAME = args.bucket\n\
+          \n        MODEL_NAME = 'pytorch_model'\n        MODEL_URI = f\"gs://{GCS_BUCKET_NAME}/{MODEL_NAME}\"\
+          \n        REGION = 'us-east4'\n\n        # ============================================================\n\
+          \        # upload\n        # ============================================================\n\
+          \n        print(\"Upload model archive to GCS\")\n\n        # download a\
+          \ pre-trained model\n        model_path = \"fine_tuned_model\"  # where\
+          \ to locally store the download\n        os.system(f'rm -r {model_path}')\n\
+          \        os.system(f'mkdir {model_path}')\n        download_directory(GCS_BUCKET_NAME,\
+          \ 'fine_tuned_model/')\n\n        # rename model bin\n        os.system(\n\
+          \            f'mv {model_path}/pytorch_model.bin {model_path}/{MODEL_NAME}.bin')\n\
+          \        model_file = f\"{model_path}/{MODEL_NAME}.bin\"\n\n        # Add\
+          \ torch-model-archiver to the PATH\n        os.environ[\"PATH\"] = f'{os.environ.get(\"\
+          PATH\")}:~/.local/bin'\n\n        # Package the model artifacts in a model\
+          \ archive file\n        os.system(f\"\"\"\n                    torch-model-archiver\
+          \ -f \\\n                        --model-name model \\\n               \
+          \         --version 1.0  \\\n                        --serialized-file {model_file}\
+          \ \\\n                        --handler custom_handler.py \\\n         \
+          \               --extra-files {model_path}/config.json,{model_path}/vocab.json,{model_path}/generation_config.json\
+          \ \\\n                        --export-path {model_path}\n             \
+          \       \"\"\")\n\n        # Copy the model artifacts to Cloud Storage\n\
+          \        os.system(f\"\"\"\n                    gsutil rm -r {MODEL_URI}\n\
+          \                    gsutil cp -r {model_path} {MODEL_URI}\n           \
+          \         gsutil ls -al {MODEL_URI}\n                    \"\"\")\n\n   \
+          \     print(\n            f'Model {MODEL_NAME} has been uploaded to GCS\
+          \ bucket {GCS_BUCKET_NAME}.')\n\n        # remove local model\n        os.system(f'rm\
+          \ -rf {model_path}')\n\n        # ============================================================\n\
+          \        # deploy\n        # ============================================================\n\
+          \n        print('Deploy model to Vertex AI')\n\n        # init vertex ai\
+          \ resource\n        aiplatform.init(project=GCP_PROJECT, location=REGION,\n\
+          \                        staging_bucket=MODEL_URI)\n\n        DEPLOY_IMAGE_URI\
+          \ = \"us-docker.pkg.dev/vertex-ai/prediction/pytorch-cpu.1-11:latest\"\n\
+          \n        # upload model for deployment\n        deployed_model = aiplatform.Model.upload(\n\
+          \            display_name=MODEL_NAME,\n            serving_container_image_uri=DEPLOY_IMAGE_URI,\n\
+          \            artifact_uri=MODEL_URI,\n        )\n\n        # deploy model\
+          \ for prediction\n        print('Deploying model...')\n        print('This\
+          \ will take a few minutes...')\n\n        DEPLOY_COMPUTE = \"n1-standard-4\"\
+          \n\n        endpoint = deployed_model.deploy(\n            deployed_model_display_name=MODEL_NAME,\n\
+          \            machine_type=DEPLOY_COMPUTE,\n            accelerator_type=None,\n\
+          \            accelerator_count=0,\n        )\n\n        print('Model deployed!')\n\
+          \        print('Endpoint:')\n        print(endpoint)\n\n    main()\n\n"
+        image: python:3.9
     exec-model-trainer:
       container:
         args:
@@ -131,6 +215,14 @@ root:
           name: comp-model-deployer
         dependentTasks:
         - model-trainer
+        inputs:
+          parameters:
+            bucket_name:
+              runtimeValue:
+                constant: hisolver-manim
+            project_name:
+              runtimeValue:
+                constant: tom-zhang-0
         taskInfo:
           name: Model Deployer
       model-trainer:
