@@ -12,6 +12,8 @@ import string
 from kfp import dsl, compiler
 import google.cloud.aiplatform as aip
 
+from model import model_trainer
+
 
 GCP_PROJECT = os.environ["GCP_PROJECT"]
 GCS_BUCKET_NAME = os.environ["GCS_BUCKET_NAME"]
@@ -99,17 +101,17 @@ def main(args=None):
 
     if args.pipeline2:
         # Define a Container Component for model fine-tuning
-        @dsl.container_component
-        def model_trainer():
-            container_spec = dsl.ContainerSpec(
-                image=MODEL_TRAINER_IMAGE,
-                command=[],
-                args=[
-                    "train.py",
-                    f"--bucket {GCS_BUCKET_NAME}"
-                ],
-            )
-            return container_spec
+        # @dsl.container_component
+        # def model_trainer():
+        #     container_spec = dsl.ContainerSpec(
+        #         image=MODEL_TRAINER_IMAGE,
+        #         command=[],
+        #         args=[
+        #             "train.py",
+        #             f"--bucket {GCS_BUCKET_NAME}"
+        #         ],
+        #     )
+        #     return container_spec
 
         # Define a Container Component for model deployment
         @dsl.container_component
@@ -129,7 +131,8 @@ def main(args=None):
         @dsl.pipeline
         def hisolver_manim_pipeline_model():
             # Model Trainer
-            model_trainer_task = model_trainer().set_display_name("Model Trainer")
+            model_trainer_task = model_trainer(
+                bucket_name=GCS_BUCKET_NAME).set_display_name("Model Trainer")
             # Model Deployer
             model_deployer_task = (
                 model_deployer()
