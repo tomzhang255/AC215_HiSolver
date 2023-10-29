@@ -13,7 +13,6 @@ from kfp import dsl, compiler
 import google.cloud.aiplatform as aip
 
 from train import model_trainer
-from deploy import model_deployer
 
 
 GCP_PROJECT = os.environ["GCP_PROJECT"]
@@ -26,10 +25,9 @@ GCP_REGION = os.environ["GCP_REGION"]
 GITHUB_PAT = os.environ['GITHUB_PAT']
 DOCKER_HUB_USERNAME = os.environ['DOCKER_HUB_USERNAME']
 
-# DATA_COLLECTOR_IMAGE = "gcr.io/ac215-project/mushroom-app-data-collector"
 DATA_COLLECTOR_IMAGE = f"{DOCKER_HUB_USERNAME}/hisolver-manim-data-collector"
 DATA_PROCESSOR_IMAGE = f"{DOCKER_HUB_USERNAME}/hisolver-manim-data-processor"
-MODEL_TRAINER_IMAGE = f"{DOCKER_HUB_USERNAME}/hisolver-manim-model-trainer"
+# MODEL_TRAINER_IMAGE = f"{DOCKER_HUB_USERNAME}/hisolver-manim-model-trainer"
 MODEL_DEPLOYER_IMAGE = f"{DOCKER_HUB_USERNAME}/hisolver-manim-model-deployer"
 
 
@@ -101,6 +99,20 @@ def main(args=None):
         job.run(service_account=GCS_SERVICE_ACCOUNT)
 
     if args.pipeline2:
+        # Define a Container Component for model deployer
+        @dsl.container_component
+        def model_deployer():
+            container_spec = dsl.ContainerSpec(
+                image=MODEL_DEPLOYER_IMAGE,
+                command=[],
+                args=[
+                    "deploy.py",
+                    f"--project {GCP_PROJECT}",
+                    f"--bucket {GCS_BUCKET_NAME}"
+                ],
+            )
+            return container_spec
+
         # Define a Pipeline
         @dsl.pipeline
         def hisolver_manim_pipeline_model():
@@ -111,8 +123,7 @@ def main(args=None):
             )
             # Model Deployer
             model_deployer_task = (
-                model_deployer(project_name=GCP_PROJECT,
-                               bucket_name=GCS_BUCKET_NAME)
+                model_deployer()
                 .set_display_name("Model Deployer")
                 .after(model_trainer_task)
             )

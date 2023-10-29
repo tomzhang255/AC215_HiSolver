@@ -45,6 +45,16 @@ def model_trainer(
         with open(dest_file, 'w') as f:
             json.dump(processed_data, f)
 
+    def delete_directory(bucket_name, prefix):
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        
+        blobs = bucket.list_blobs(prefix=prefix, delimiter='/')
+        for blob in blobs:
+            blob.delete()
+
+        print(f'All blobs in {bucket_name}/{prefix} have been deleted.')
+
     def upload_directory_to_gcs(bucket_name, source_directory_path, destination_directory_path):
         """Uploads a local directory to GCS"""
         client = storage.Client()
@@ -151,6 +161,7 @@ def model_trainer(
     tokenizer.save_pretrained('model')
 
     # upload to bucket
+    delete_directory(GCS_BUCKET_NAME, 'fine_tuned_model/')
     upload_directory_to_gcs(GCS_BUCKET_NAME, 'model', 'fine_tuned_model')
 
     # remove files

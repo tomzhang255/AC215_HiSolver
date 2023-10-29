@@ -26,6 +26,13 @@ def download_directory(bucket_name, source_dir_prefix):
 
 
 def main(args=None):
+    # transformers = "*"
+    # torch = "*"
+    # torch-model-archiver = "*"
+
+    # these make the image too big for pipeline, so installing them here
+    os.system('pip install transformers torch torch-model-archiver')
+
     # Constants
     GCP_PROJECT = os.environ.get("GCP_PROJECT")
     if args.project != "":

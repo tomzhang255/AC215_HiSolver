@@ -8,10 +8,6 @@ verify_ssl = true
 [packages]
 google-cloud-aiplatform = "*"
 google-cloud-storage = "*"
-transformers = "*"
-torch = "*"
-torch-model-archiver = "*"
-packaging = "*"
 
 [requires]
 python_version = "3.9"
