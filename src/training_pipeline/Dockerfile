@@ -1,5 +1,6 @@
 # Use the official Debian-hosted Python image
 FROM python:3.9-slim-buster
+# FROM nvidia/cuda:12.2.2-base-ubi8
 
 ARG DEBIAN_PACKAGES="build-essential git curl wget unzip gzip"
 
@@ -48,6 +49,9 @@ WORKDIR /app
 ADD --chown=app:app Pipfile Pipfile.lock /app/
 
 RUN pipenv sync
+
+# a problem with the latest version of torch - cublaslib does not exist; using a previous version
+# RUN pip install "torch==2.0.0"
 
 # Add the rest of the source code. This is done last so we don't invalidate all
 # layers when we change a line of code.
