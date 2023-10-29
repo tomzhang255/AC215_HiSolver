@@ -6,9 +6,7 @@ Make sure you've followed all the steps from the data pre-processing section `sr
 
 ## II. Training-related setup
 
-1. Traverse to the correct directory: `src/training`
-
-2. Copy the `secrets/` folder from `src/secrets/` so it now has a copy at `src/training/secrets/`
+1. Copy the `secrets/` folder from `src/secrets/` so it now has a copy at `src/training/secrets/`
 
 ## III. [Optional] Run training script locally
 
