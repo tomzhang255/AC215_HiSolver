@@ -9,8 +9,7 @@ import os
 import argparse
 import random
 import string
-from kfp import dsl
-from kfp import compiler
+from kfp import dsl, compiler
 import google.cloud.aiplatform as aip
 
 
@@ -27,6 +26,8 @@ DOCKER_HUB_USERNAME = os.environ['DOCKER_HUB_USERNAME']
 # DATA_COLLECTOR_IMAGE = "gcr.io/ac215-project/mushroom-app-data-collector"
 DATA_COLLECTOR_IMAGE = f"{DOCKER_HUB_USERNAME}/hisolver-manim-data-collector"
 DATA_PROCESSOR_IMAGE = f"{DOCKER_HUB_USERNAME}/hisolver-manim-data-processor"
+MODEL_TRAINER_IMAGE = f"{DOCKER_HUB_USERNAME}/hisolver-manim-model-trainer"
+MODEL_DEPLOYER_IMAGE = f"{DOCKER_HUB_USERNAME}/hisolver-manim-model-deployer"
 
 
 def generate_uuid(length: int = 8) -> str:
@@ -67,7 +68,7 @@ def main(args=None):
 
         # Define a Pipeline
         @dsl.pipeline
-        def ml_pipeline():
+        def hisolver_manim_pipeline_data():
             # Data Collector
             data_collector_task = data_collector().set_display_name("Data Collector")
             # Data Processor
@@ -78,7 +79,8 @@ def main(args=None):
             )
 
         # Build yaml file for pipeline
-        compiler.Compiler().compile(ml_pipeline, package_path="pipeline1.yaml")
+        compiler.Compiler().compile(hisolver_manim_pipeline_data,
+                                    package_path="pipeline1.yaml")
 
         # Submit job to Vertex AI
         aip.init(project=GCP_PROJECT, location=GCP_REGION,
@@ -89,6 +91,65 @@ def main(args=None):
         job = aip.PipelineJob(
             display_name=DISPLAY_NAME,
             template_path="pipeline1.yaml",
+            pipeline_root=PIPELINE_ROOT,
+            enable_caching=False,
+        )
+
+        job.run(service_account=GCS_SERVICE_ACCOUNT)
+
+    if args.pipeline2:
+        # Define a Container Component for model fine-tuning
+        @dsl.container_component
+        def model_trainer():
+            container_spec = dsl.ContainerSpec(
+                image=MODEL_TRAINER_IMAGE,
+                command=[],
+                args=[
+                    "train.py",
+                    f"--bucket {GCS_BUCKET_NAME}"
+                ],
+            )
+            return container_spec
+
+        # Define a Container Component for model deployment
+        @dsl.container_component
+        def model_deployer():
+            container_spec = dsl.ContainerSpec(
+                image=MODEL_DEPLOYER_IMAGE,
+                command=[],
+                args=[
+                    "deploy.py",
+                    f"--bucket {GCS_BUCKET_NAME}",
+                    f"--project {GCP_PROJECT}"
+                ],
+            )
+            return container_spec
+
+        # Define a Pipeline
+        @dsl.pipeline
+        def hisolver_manim_pipeline_model():
+            # Model Trainer
+            model_trainer_task = model_trainer().set_display_name("Model Trainer")
+            # Model Deployer
+            model_deployer_task = (
+                model_deployer()
+                .set_display_name("Model Deployer")
+                .after(model_trainer_task)
+            )
+
+        # Build yaml file for pipeline
+        compiler.Compiler().compile(hisolver_manim_pipeline_model,
+                                    package_path="pipeline2.yaml")
+
+        # Submit job to Vertex AI
+        aip.init(project=GCP_PROJECT, location=GCP_REGION,
+                 staging_bucket=BUCKET_URI)
+
+        job_id = generate_uuid()
+        DISPLAY_NAME = "hisolver-manim-pipeline-model-" + job_id
+        job = aip.PipelineJob(
+            display_name=DISPLAY_NAME,
+            template_path="pipeline2.yaml",
             pipeline_root=PIPELINE_ROOT,
             enable_caching=False,
         )

@@ -31,3 +31,7 @@ wait til the pipeline finishes, then do label studio stuff... then:
 ```shell
 python cli.py --pipeline2
 ```
+
+again, once you see "PipelineState.PIPELINE_STATE_RUNNING" that means the pipeline has been deployed and is running; you can safely quit the docker shell and check on gcp console (select the right region: us-east4)
+
+feel free to quit the container's shell too at this point.

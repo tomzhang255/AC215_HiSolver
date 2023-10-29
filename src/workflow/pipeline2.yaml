@@ -1,0 +1,45 @@
+# PIPELINE DEFINITION
+# Name: hisolver-manim-pipeline-model
+components:
+  comp-model-deployer:
+    executorLabel: exec-model-deployer
+  comp-model-trainer:
+    executorLabel: exec-model-trainer
+deploymentSpec:
+  executors:
+    exec-model-deployer:
+      container:
+        args:
+        - deploy.py
+        - --bucket hisolver-manim
+        - --project tom-zhang-0
+        image: tomzhang777/hisolver-manim-model-deployer
+    exec-model-trainer:
+      container:
+        args:
+        - train.py
+        - --bucket hisolver-manim
+        image: tomzhang777/hisolver-manim-model-trainer
+pipelineInfo:
+  name: hisolver-manim-pipeline-model
+root:
+  dag:
+    tasks:
+      model-deployer:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-model-deployer
+        dependentTasks:
+        - model-trainer
+        taskInfo:
+          name: Model Deployer
+      model-trainer:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-model-trainer
+        taskInfo:
+          name: Model Trainer
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.3.0

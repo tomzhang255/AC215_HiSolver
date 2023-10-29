@@ -1,5 +1,5 @@
 # PIPELINE DEFINITION
-# Name: ml-pipeline
+# Name: hisolver-manim-pipeline-data
 components:
   comp-data-collector:
     executorLabel: exec-data-collector
@@ -22,7 +22,7 @@ deploymentSpec:
         - --dvc FIXME-dvc-remote-name
         image: tomzhang777/hisolver-manim-data-processor
 pipelineInfo:
-  name: ml-pipeline
+  name: hisolver-manim-pipeline-data
 root:
   dag:
     tasks:

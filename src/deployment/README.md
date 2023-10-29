@@ -11,9 +11,13 @@ be in the deployment/ dir, to build and run a docker container, a shell will be 
 in the docker shell:
 
 ```shell
-python cli.py --upload
+python deploy.py
 ```
 
+exit contianer's shell
+
+push image to docker hub
+
 ```shell
-python cli.py --deploy
+./docker-hub.sh
 ```

@@ -65,20 +65,8 @@
 
 3. Record your username in `secrets/docker_hub_username.txt`
 
-4. Login to the hub:
+4. Run this script to push image to docker hub:
 
 ```shell
-docker login -u $(cat ../../secrets/docker_hub_username.txt) -p $(cat ../../secrets/docker_hub_token.txt)
-```
-
-5. Build and tag the image:
-
-```shell
-docker build -t $(cat ../../secrets/docker_hub_username.txt)/hisolver-manim-data-collector --platform=linux/amd64/v2 -f Dockerfile .
-```
-
-6. Push to docker hub:
-
-```shell
-docker push $(cat ../../secrets/docker_hub_username.txt)/hisolver-manim-data-collector
+./docker-hub.sh
 ```

@@ -20,20 +20,8 @@ Make sure you've followed all the steps from the data collection section `src/co
 
 ## III. Push image to docker hub
 
-1. Login to the hub:
+1. Run this script to push image to docker hub:
 
 ```shell
-docker login -u $(cat ../../secrets/docker_hub_username.txt) -p $(cat ../../secrets/docker_hub_token.txt)
-```
-
-2. Build and tag the image:
-
-```shell
-docker build -t $(cat ../../secrets/docker_hub_username.txt)/hisolver-manim-data-processor --platform=linux/amd64/v2 -f Dockerfile .
-```
-
-3. Push to docker hub:
-
-```shell
-docker push $(cat ../../secrets/docker_hub_username.txt)/hisolver-manim-data-processor
+./docker-hub.sh
 ```

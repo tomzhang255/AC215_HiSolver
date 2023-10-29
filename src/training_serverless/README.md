@@ -1,16 +1,20 @@
 # LLM Fine-tuning
 
-## I. Check work
+## I. Note
+
+This directory is self-contained demonstration of serverless training with Vertex AI. It is not part of the final Vertex AI pipeline. The training component to be used in the final pipeline is in `src/training_pipeline/`.
+
+## II. Check work
 
 Make sure you've followed all the steps from the data pre-processing section `src/data-labeling/README.md`.
 
-## II. Training-related setup
+## III. Training-related setup
 
 1. Traverse to the correct directory: `src/training`
 
 2. Copy the `secrets/` folder from `src/data-labeling/` so it now has a copy at `src/training/secrets/`
 
-## III. [Optional] Run training script locally
+## IV. [Optional] Run training script locally
 
 1. Run the following to test-run the training script in a local docker container:
 
@@ -28,7 +32,7 @@ docker build -t hisolver-manim-training .
 docker run -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json -e GCS_BUCKET_NAME=$(cat secrets/gcs_bucket_name.txt) hisolver-manim-training
 ```
 
-## IV. Serverless training with Vertex AI
+## V. Serverless training with Vertex AI
 
 1. Go to Google Cloud Platform Console -> select your project -> search for "Vertex AI" in the search bar -> Click "ENABLE ALL RECOMMENDED APIS" on the home page
 
