@@ -8,15 +8,7 @@ Make sure you've followed all the steps from the data pre-processing section `sr
 
 1. Copy the `secrets/` folder from `src/secrets/` so it now has a copy at `src/training/secrets/`
 
-## III. [Optional] Run training script locally
-
-1. Run the following to test-run the training script in a local docker container:
-
-```shell
-./run.sh
-```
-
-## IV. Serverless training with Vertex AI
+## III. Serverless training with Vertex AI
 
 1. Go to Google Cloud Platform Console -> select your project -> search for "Vertex AI" in the search bar -> Click "ENABLE ALL RECOMMENDED APIS" on the home page
 

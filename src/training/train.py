@@ -86,7 +86,7 @@ def main(args=None):
         GCS_BUCKET_NAME = args.bucket
 
     # Retieve labeled data, save locally to a data folder
-    data_file = '/app/data.json'
+    data_file = '/app/data/data.json'
     preprocess_json(GCS_BUCKET_NAME, data_file)
     print('> Finished retrieving labeled data from bucket')
 
@@ -149,9 +149,9 @@ def main(args=None):
     upload_directory_to_gcs(GCS_BUCKET_NAME, 'model', 'fine_tuned_model')
 
     # remove files
-    os.system('rm -rf data.json')
+    # os.system('rm -rf data/data.json')
     os.system('rm -rf gpt2-qa/')
-    os.system('rm -rf model/')
+    # os.system('rm -rf model/')
 
 
 if __name__ == "__main__":

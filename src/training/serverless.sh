@@ -22,5 +22,8 @@ docker push gcr.io/$(cat secrets/gcp_project_id.txt)/hisolver-manim-training:lat
 gcloud ai custom-jobs create \
   --region=us-east4 \
   --display-name=hisolver-manim-training-job \
-  --worker-pool-spec=machine-type=e2-standard-4,replica-count=1,container-image-uri=gcr.io/$(cat secrets/gcp_project_id.txt)/hisolver-manim-training:latest
+  --worker-pool-spec=machine-type=g2-standard-4,accelerator-type=NVIDIA_L4,accelerator-count=1,replica-count=1,container-image-uri=gcr.io/$(cat secrets/gcp_project_id.txt)/hisolver-manim-training:latest
 ```
+
+# cpu
+# --worker-pool-spec=machine-type=e2-standard-4,replica-count=1,container-image-uri=gcr.io/$(cat secrets/gcp_project_id.txt)/hisolver-manim-training:latest
