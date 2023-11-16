@@ -8,26 +8,20 @@ Make sure you've followed all the steps from the data collection section `src/co
 
 1. Start a Docker daemon (i.e., open up Docker Desktop)
 
-2. Copy the `secrets` folder from `src/collection/secrets/` and paste it to `src/preprocessing/secrets`
+2. Traverse to the correct directory: `src/preprocessing/`
 
-3. Traverse to the correct directory: `src/preprocessing/`
+3. Build and run docker container: `./docker-shell.sh`
 
-4. Run the following:
-
-```shell
-# Remove all containers built from this image if such containers exist
-docker ps -a --filter "ancestor=hisolver-manim-preprocessing" -q | xargs docker stop && docker ps -a --filter "ancestor=hisolver-manim-preprocessing" -q | xargs docker rm
-
-# Remove image if it exists
-docker images | grep -q "hisolver-manim-preprocessing" && docker rmi hisolver-manim-preprocessing
-
-# Build docker image
-docker build -t hisolver-manim-preprocessing .
-
-# Run pre-processing script in container
-docker run -v ./secrets/hisolver-data-collection-secrets.json:/secrets/service-account-key.json -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json -e GCS_BUCKET_NAME=$(cat secrets/gcs_bucket_name.txt) hisolver-manim-preprocessing
-```
+4. Once container starts running, it should bring up a shell prompt; in it, run: `python preprocess.py`
 
 5. The pre-processing script should be running; if you go to your bucket page again on GCP, you should see the bucket being populated with processed JSON files in the `processed/` folder
 
-6. In case you need to rebuild the container, just rerun step 4
+6. In case you need to rebuild the container, just rerun step 3
+
+## III. Push image to docker hub
+
+1. Run this script to push image to docker hub:
+
+```shell
+./docker-hub.sh
+```

@@ -4,6 +4,7 @@ import astor
 import json
 import tempfile
 from datetime import datetime
+import argparse
 import shutil
 import sys
 import subprocess
@@ -12,8 +13,7 @@ from dask import delayed
 from dask.distributed import Client
 from google.cloud import storage
 
-DVC_REMOTE_NAME = os.environ.get("DVC_REMOTE_NAME")
-GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
+
 os.environ["HOME"] = "/app"
 
 
@@ -44,7 +44,16 @@ def extract_classes(temp_dir, blob_name):
     return class_defs, blob_name
 
 
-if __name__ == '__main__':
+def main(args=None):
+    # constants
+    GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
+    if args.bucket != "":
+        GCS_BUCKET_NAME = args.bucket
+
+    DVC_REMOTE_NAME = os.environ.get("DVC_REMOTE_NAME")
+    if args.dvc != "":
+        DVC_REMOTE_NAME = args.dvc
+
     t0 = datetime.now()
 
     client = Client()  # Initialize a Dask client
@@ -90,11 +99,16 @@ if __name__ == '__main__':
     sys.stdout.flush()
 
     # DVC operations
-    os.chdir('/app')  # Ensure we're in the right directory
-    subprocess.run(["dvc", "add", processed_dir])  # Track processed directory with DVC
-    subprocess.run(["dvc", "push", "-r",DVC_REMOTE_NAME])  # Push changes to DVC remote on GCS
-    subprocess.run(["git", "add", ".dvc", f"{processed_dir}.dvc"])  # Add DVC metadata files to Git
-    subprocess.run(["git", "commit", "-m", "Update processed data"])  # Commit the DVC changes to Git
+    if False:  # FIXME testing pipeline without DVC as of now
+        os.chdir('/app')  # Ensure we're in the right directory
+        # Track processed directory with DVC
+        subprocess.run(["dvc", "add", processed_dir])
+        # Push changes to DVC remote on GCS
+        subprocess.run(["dvc", "push", "-r", DVC_REMOTE_NAME])
+        # Add DVC metadata files to Git
+        subprocess.run(["git", "add", ".dvc", f"{processed_dir}.dvc"])
+        # Commit the DVC changes to Git
+        subprocess.run(["git", "commit", "-m", "Update processed data"])
 
     # Optionally, clean up the temporary directory
     shutil.rmtree(temp_dir)
@@ -103,3 +117,28 @@ if __name__ == '__main__':
     t1 = datetime.now()
     print(f'===== Time elasposed to pre-process: {t1 - t0}')
     sys.stdout.flush()
+
+
+if __name__ == "__main__":
+    # Generate the inputs arguments parser
+    # if you type into the terminal 'python cli.py --help', it will provide the description
+    parser = argparse.ArgumentParser(description="Collector CLI")
+
+    parser.add_argument(
+        "-b",
+        "--bucket",
+        type=str,
+        default="",
+        help="GCS bucket name",
+    )
+    parser.add_argument(
+        "-d",
+        "--dvc",
+        type=str,
+        default="",
+        help="DVC remote name",
+    )
+
+    args = parser.parse_args()
+
+    main(args)

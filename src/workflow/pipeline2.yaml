@@ -1,0 +1,154 @@
+# PIPELINE DEFINITION
+# Name: hisolver-manim-pipeline-model
+components:
+  comp-model-deployer:
+    executorLabel: exec-model-deployer
+  comp-model-trainer:
+    executorLabel: exec-model-trainer
+    inputDefinitions:
+      parameters:
+        bucket_name:
+          defaultValue: ''
+          isOptional: true
+          parameterType: STRING
+deploymentSpec:
+  executors:
+    exec-model-deployer:
+      container:
+        args:
+        - deploy.py
+        - --project tom-zhang-0
+        - --bucket hisolver-manim
+        image: tomzhang777/hisolver-manim-model-deployer
+    exec-model-trainer:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - model_trainer
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.3.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'google-cloud-storage'\
+          \ 'torch' 'transformers[torch]' && \"$0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef model_trainer(\n    bucket_name: str = \"\"\n):\n    print(\"\
+          Model Training\")\n\n    import os\n    import json\n    from datetime import\
+          \ datetime\n    from google.cloud import storage\n    from torch.utils.data\
+          \ import Dataset\n    from transformers import GPT2Tokenizer, GPT2LMHeadModel,\
+          \ Trainer, TrainingArguments\n\n    def preprocess_json(bucket_name, dest_file):\n\
+          \        gcs_client = storage.Client()\n        bucket = gcs_client.get_bucket(bucket_name)\n\
+          \        blobs = list(bucket.list_blobs(prefix='labeled/'))\n\n        processed_data\
+          \ = []  # list to hold processed json objects\n\n        for blob in blobs:\n\
+          \            # download blob content to a string\n            blob_data\
+          \ = blob.download_as_text()\n            data = json.loads(blob_data)\n\n\
+          \            # Extracting only the necessary fields\n            simplified_data\
+          \ = {\n                'prompt': data['result'][0]['value']['text'][0],\n\
+          \                'code': data['task']['data']['code']\n            }\n\n\
+          \            # append processed data to list\n            processed_data.append(simplified_data)\n\
+          \n        # Ensure the destination directory exists\n        os.makedirs(os.path.dirname(dest_file),\
+          \ exist_ok=True)\n\n        # Write all processed data to a single json\
+          \ file\n        with open(dest_file, 'w') as f:\n            json.dump(processed_data,\
+          \ f)\n\n    def delete_directory(bucket_name, prefix):\n        storage_client\
+          \ = storage.Client()\n        bucket = storage_client.bucket(bucket_name)\n\
+          \n        blobs = bucket.list_blobs(prefix=prefix, delimiter='/')\n    \
+          \    for blob in blobs:\n            blob.delete()\n\n        print(f'All\
+          \ blobs in {bucket_name}/{prefix} have been deleted.')\n\n    def upload_directory_to_gcs(bucket_name,\
+          \ source_directory_path, destination_directory_path):\n        \"\"\"Uploads\
+          \ a local directory to GCS\"\"\"\n        client = storage.Client()\n  \
+          \      bucket = client.get_bucket(bucket_name)\n\n        for root, dirs,\
+          \ files in os.walk(source_directory_path):\n            for file_name in\
+          \ files:\n                local_file_path = os.path.join(root, file_name)\n\
+          \                blob_destination_path = os.path.join(\n               \
+          \     destination_directory_path, local_file_path[len(source_directory_path)\
+          \ + 1:])\n                blob = bucket.blob(blob_destination_path)\n  \
+          \              blob.upload_from_filename(local_file_path)\n            \
+          \    print(f'{local_file_path} uploaded to {blob_destination_path}.')\n\n\
+          \    class CustomDataset(Dataset):\n        def __init__(self, filename,\
+          \ tokenizer):\n            with open(filename, 'r') as f:\n            \
+          \    self.data = json.load(f)\n            self.tokenizer = tokenizer\n\n\
+          \        def __len__(self):\n            return len(self.data)\n\n     \
+          \   def __getitem__(self, i):\n            item = self.data[i]\n       \
+          \     text = f\"Prompt: {item['prompt']} Code: {item['code']}\"\n      \
+          \      encoding = self.tokenizer(\n                text,\n             \
+          \   truncation=True,\n                padding='max_length',  # Pad to max_length\n\
+          \                max_length=128,  # You can adjust this value based on your\
+          \ needs\n                return_tensors='pt'\n            )\n          \
+          \  return {\n                'input_ids': encoding['input_ids'][0],\n  \
+          \              'attention_mask': encoding['attention_mask'][0],\n      \
+          \          # assuming language modeling objective\n                'labels':\
+          \ encoding['input_ids'][0]\n            }\n\n    # ========== main ==========\n\
+          \n    # contants\n    GCS_BUCKET_NAME = bucket_name\n\n    # Retieve labeled\
+          \ data, save locally to a data folder\n    data_file = '/app/data.json'\n\
+          \    preprocess_json(GCS_BUCKET_NAME, data_file)\n    print('> Finished\
+          \ retrieving labeled data from bucket')\n\n    # Load the distilled GPT-2\
+          \ model and tokenizer\n    model = GPT2LMHeadModel.from_pretrained(\"distilgpt2\"\
+          )\n    tokenizer = GPT2Tokenizer.from_pretrained(\"distilgpt2\")\n\n   \
+          \ # Add the [PAD] token to the tokenizer and model\n    # GPT-2 uses the\
+          \ EOS token as the PAD token\n    pad_token_id = tokenizer.eos_token_id\n\
+          \    tokenizer.pad_token = tokenizer.eos_token\n    model.config.pad_token_id\
+          \ = pad_token_id\n\n    # Set the pad_token\n    if tokenizer.pad_token\
+          \ is None:\n        tokenizer.add_tokens(['[PAD]'])\n        tokenizer.pad_token\
+          \ = '[PAD]'\n\n    # Load the custom dataset\n    train_dataset = CustomDataset(data_file,\
+          \ tokenizer)\n\n    # Define the Trainer and TrainingArguments\n    training_args\
+          \ = TrainingArguments(\n        output_dir=\"./gpt2-qa\",\n        overwrite_output_dir=True,\n\
+          \        num_train_epochs=3,\n        per_device_train_batch_size=32,\n\
+          \        save_steps=10_000,\n        save_total_limit=2,\n    )\n\n    trainer\
+          \ = Trainer(\n        model=model,\n        args=training_args,\n      \
+          \  train_dataset=train_dataset,\n    )\n\n    # Train the model\n    t0\
+          \ = datetime.now()\n    trainer.train()\n    t1 = datetime.now()\n    print(\"\
+          > Training took: \", t1 - t0)\n\n    # demo\n    input_text = \"say something\"\
+          \n    input_ids = tokenizer.encode(input_text, return_tensors='pt')\n  \
+          \  output = model.generate(input_ids, max_length=50,\n                 \
+          \           num_return_sequences=1, pad_token_id=tokenizer.eos_token_id)\n\
+          \n    decoded_output = tokenizer.decode(output[0], skip_special_tokens=True)\n\
+          \    print(f'> Q: {input_text}')\n    print(f'> A: {decoded_output}')\n\n\
+          \    # save model and tokenizer\n\n    model.save_pretrained('model')\n\
+          \    tokenizer.save_pretrained('model')\n\n    # upload to bucket\n    delete_directory(GCS_BUCKET_NAME,\
+          \ 'fine_tuned_model/')\n    upload_directory_to_gcs(GCS_BUCKET_NAME, 'model',\
+          \ 'fine_tuned_model')\n\n    # remove files\n    os.system('rm -rf data.json')\n\
+          \    os.system('rm -rf gpt2-qa/')\n    os.system('rm -rf model/')\n\n"
+        image: python:3.9
+pipelineInfo:
+  name: hisolver-manim-pipeline-model
+root:
+  dag:
+    tasks:
+      model-deployer:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-model-deployer
+        dependentTasks:
+        - model-trainer
+        taskInfo:
+          name: Model Deployer
+      model-trainer:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-model-trainer
+        inputs:
+          parameters:
+            bucket_name:
+              runtimeValue:
+                constant: hisolver-manim
+        taskInfo:
+          name: Model Trainer
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.3.0

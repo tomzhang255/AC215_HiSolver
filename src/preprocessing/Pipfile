@@ -7,7 +7,9 @@ verify_ssl = true
 
 [packages]
 google-cloud-storage = "*"
-label-studio-sdk = "*"
+dask = {extras = ["distributed"], version = "*"}
+astor = "*"
+dvc-gs = "*"
 
 [requires]
 python_version = "3.9"

@@ -1,0 +1,46 @@
+# PIPELINE DEFINITION
+# Name: hisolver-manim-pipeline-data
+components:
+  comp-data-collector:
+    executorLabel: exec-data-collector
+  comp-data-processor:
+    executorLabel: exec-data-processor
+deploymentSpec:
+  executors:
+    exec-data-collector:
+      container:
+        args:
+        - collect.py
+        - --bucket hisolver-manim
+        - --pat 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
+        image: tomzhang777/hisolver-manim-data-collector
+    exec-data-processor:
+      container:
+        args:
+        - preprocess.py
+        - --bucket hisolver-manim
+        - --dvc FIXME-dvc-remote-name
+        image: tomzhang777/hisolver-manim-data-processor
+pipelineInfo:
+  name: hisolver-manim-pipeline-data
+root:
+  dag:
+    tasks:
+      data-collector:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-data-collector
+        taskInfo:
+          name: Data Collector
+      data-processor:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-data-processor
+        dependentTasks:
+        - data-collector
+        taskInfo:
+          name: Data Processor
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.3.0

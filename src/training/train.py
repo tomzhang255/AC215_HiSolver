@@ -1,133 +1,172 @@
 import os
 import json
+import argparse
 from datetime import datetime
 
 from google.cloud import storage
-import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments
 
 
-GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
+def preprocess_json(bucket_name, dest_file):
+    gcs_client = storage.Client()
+    bucket = gcs_client.get_bucket(bucket_name)
+    blobs = list(bucket.list_blobs(prefix='labeled/'))
+
+    processed_data = []  # list to hold processed json objects
+
+    for blob in blobs:
+        # download blob content to a string
+        blob_data = blob.download_as_text()
+        data = json.loads(blob_data)
+
+        # Extracting only the necessary fields
+        simplified_data = {
+            'prompt': data['result'][0]['value']['text'][0],
+            'code': data['task']['data']['code']
+        }
+
+        processed_data.append(simplified_data)  # append processed data to list
+
+    # Ensure the destination directory exists
+    os.makedirs(os.path.dirname(dest_file), exist_ok=True)
+
+    # Write all processed data to a single json file
+    with open(dest_file, 'w') as f:
+        json.dump(processed_data, f)
+
+
+def upload_directory_to_gcs(bucket_name, source_directory_path, destination_directory_path):
+    """Uploads a local directory to GCS"""
+    client = storage.Client()
+    bucket = client.get_bucket(bucket_name)
+
+    for root, dirs, files in os.walk(source_directory_path):
+        for file_name in files:
+            local_file_path = os.path.join(root, file_name)
+            blob_destination_path = os.path.join(
+                destination_directory_path, local_file_path[len(source_directory_path) + 1:])
+            blob = bucket.blob(blob_destination_path)
+            blob.upload_from_filename(local_file_path)
+            print(f'{local_file_path} uploaded to {blob_destination_path}.')
 
 
 class CustomDataset(Dataset):
-    def __init__(self, data_dir, tokenizer):
-        self.data_files = [os.path.join(data_dir, f)
-                           for f in os.listdir(data_dir)]
-        self.data = []
-        for file in self.data_files:
-            with open(file, 'r') as f:
-                data = json.load(f)
-            self.data.append(data)
+    def __init__(self, filename, tokenizer):
+        with open(filename, 'r') as f:
+            self.data = json.load(f)
         self.tokenizer = tokenizer
 
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, idx):
-        """
-        This needs to be overridden
-        because the pretrained transformer expects different keys than prompt and code
-        """
-        item = self.data[idx]
-        prompt, code = item['prompt'], item['code']
-        encoding = self.tokenizer.encode_plus(
-            prompt,
-            code,
+    def __getitem__(self, i):
+        item = self.data[i]
+        text = f"Prompt: {item['prompt']} Code: {item['code']}"
+        encoding = self.tokenizer(
+            text,
             truncation=True,
-            padding='max_length',
-            max_length=512,
-            return_tensors='pt',
-            add_special_tokens=True  # Add '[CLS]', '[SEP]'
+            padding='max_length',  # Pad to max_length
+            max_length=128,  # You can adjust this value based on your needs
+            return_tensors='pt'
         )
-        return {key: val.squeeze(0) for key, val in encoding.items()}
+        return {
+            'input_ids': encoding['input_ids'][0],
+            'attention_mask': encoding['attention_mask'][0],
+            # assuming language modeling objective
+            'labels': encoding['input_ids'][0]
+        }
 
 
-def preprocess_json(bucket_name, dest_dir):
-    gcs_client = storage.Client()
-    bucket = gcs_client.get_bucket(bucket_name)
-    blobs = list(bucket.list_blobs(prefix='labeled/'))
+def main(args=None):
+    # contants
+    GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
+    # If bucket was passed as argument
+    if args.bucket != "":
+        GCS_BUCKET_NAME = args.bucket
 
-    for blob in blobs:
-        # Omit labeled/ when writing - so it's just dest_dir/file not dest_dir/labeled/file
-        file_path = f'/{dest_dir}/{blob.name[8:]}'
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-
-        blob.download_to_filename(file_path)
-        with open(file_path, 'r') as f:
-            data = json.load(f)
-
-        # Extracting only the necessary fields then JSON to destination directory
-        simplified_data = {'prompt': data['result'][0]['value']
-                           ['text'][0], 'code': data['task']['data']['code']}
-        with open(file_path, 'w') as f:
-            json.dump(simplified_data, f)
-
-
-def main():
     # Retieve labeled data, save locally to a data folder
-    data_dir = '/app/data'
-    preprocess_json(GCS_BUCKET_NAME, data_dir)
-    print('===== Finished retrieving labeled data from bucket')
+    data_file = '/app/data/data.json'
+    preprocess_json(GCS_BUCKET_NAME, data_file)
+    print('> Finished retrieving labeled data from bucket')
 
-    # # Load the data into PyTorch
-    # dataset = CustomDataset(data_dir)
-    # dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-
-    # Load pre-trained DistilGPT-2 and tokenizer
-    print('===== Loading model and tokenizer...')
-    # 353 MB, 1 min to download
+    # Load the distilled GPT-2 model and tokenizer
     model = GPT2LMHeadModel.from_pretrained("distilgpt2")
     tokenizer = GPT2Tokenizer.from_pretrained("distilgpt2")
-    # Set padding token to be the same as EOS token
-    tokenizer.pad_token = tokenizer.eos_token
-    # Load the data into PyTorch and create transformer-specific keys with tokenizer
-    dataset = CustomDataset(data_dir, tokenizer)
-    print('===== Finished loading model and tokenizer')
 
-    # Define training arguments
+    # Add the [PAD] token to the tokenizer and model
+    # GPT-2 uses the EOS token as the PAD token
+    pad_token_id = tokenizer.eos_token_id
+    tokenizer.pad_token = tokenizer.eos_token
+    model.config.pad_token_id = pad_token_id
+
+    # Set the pad_token
+    if tokenizer.pad_token is None:
+        tokenizer.add_tokens(['[PAD]'])
+        tokenizer.pad_token = '[PAD]'
+
+    # Load the custom dataset
+    train_dataset = CustomDataset(data_file, tokenizer)
+
+    # Define the Trainer and TrainingArguments
     training_args = TrainingArguments(
+        output_dir="./gpt2-qa",
+        overwrite_output_dir=True,
+        num_train_epochs=3,
         per_device_train_batch_size=32,
-        output_dir='./results',
-        num_train_epochs=1,  # You can adjust the number of epochs
-        logging_dir='./logs',
-        logging_steps=10,
+        save_steps=10_000,
+        save_total_limit=2,
     )
 
-    # Define Trainer
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=dataset,
+        train_dataset=train_dataset,
     )
 
     # Train the model
-    print('===== Fine-tuning...')
+    t0 = datetime.now()
     trainer.train()
-    print('===== Finished fine-tuning')
+    t1 = datetime.now()
+    print("> Training took: ", t1 - t0)
 
-    # Save the trained model
-    model_dir = '/app/fine-tuned'
-    model.save_pretrained(model_dir)
+    # demo
+    input_text = "say something"
+    input_ids = tokenizer.encode(input_text, return_tensors='pt')
+    output = model.generate(input_ids, max_length=50,
+                            num_return_sequences=1, pad_token_id=tokenizer.eos_token_id)
 
-    # ===== Demo =====
-    print('===== Demo...')
+    decoded_output = tokenizer.decode(output[0], skip_special_tokens=True)
+    print(f'> Q: {input_text}')
+    print(f'> A: {decoded_output}')
 
-    # Load the fine-tuned model
-    model = GPT2LMHeadModel.from_pretrained(model_dir)
+    # save model and tokenizer
 
-    # Example demo to test the fine-tuned model
-    prompt_text = "Create a function in Python to add two numbers"
-    inputs = tokenizer(prompt_text, return_tensors="pt")
-    outputs = model.generate(**inputs)
-    generated_code = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    model.save_pretrained('model')
+    tokenizer.save_pretrained('model')
 
-    print(f'Prompt: {prompt_text}')
-    print('-----')
-    print('Output:')
-    print(generated_code)
+    # upload to bucket
+    upload_directory_to_gcs(GCS_BUCKET_NAME, 'model', 'fine_tuned_model')
+
+    # remove files
+    # os.system('rm -rf data/data.json')
+    os.system('rm -rf gpt2-qa/')
+    # os.system('rm -rf model/')
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    # Generate the inputs arguments parser
+    # if you type into the terminal 'python cli.py --help', it will provide the description
+    parser = argparse.ArgumentParser(description="Trainer CLI")
+
+    parser.add_argument(
+        "-b",
+        "--bucket",
+        type=str,
+        default="",
+        help="GCS bucket name",
+    )
+
+    args = parser.parse_args()
+
+    main(args)

@@ -25,23 +25,24 @@ RUN set -ex; \
     apt-get install -y --no-install-recommends $DEBIAN_PACKAGES && \
     apt-get install -y --no-install-recommends software-properties-common apt-transport-https ca-certificates gnupg2 gnupg-agent curl openssh-client && \
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
+    curl -s https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
-    echo "deb http://packages.cloud.google.com/apt gcsfuse-bionic main" > /etc/apt/sources.list.d/gcsfuse.list && \ 
     apt-get update && \
-    apt-get install -y --no-install-recommends google-cloud-sdk jq && \
+    apt-get install -y --no-install-recommends google-cloud-sdk docker-ce && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     pip install --no-cache-dir --upgrade pip && \
-    pip install pipenv  && \
-    useradd -ms /bin/bash app -d /home/app -u 1000 -p "$(openssl passwd -1 Passw0rd)" && \
+    pip install pipenv && \
+    pip install openshift docker apache-libcloud && \
+    useradd -ms /bin/bash app -d /home/app -u 1000 -p "$(openssl passwd -1 passw0rd)" && \
+    usermod -aG docker app && \
     mkdir -p /app && \
-    mkdir -p /persistent && \
-    chown app:app /persistent && \
     chown app:app /app
 
 # Switch to the new user
-USER app
+#USER app
 WORKDIR /app
 
 # Install python packages
@@ -54,6 +55,4 @@ RUN pipenv sync
 ADD --chown=app:app . /app
 
 # Entry point
-#ENTRYPOINT ["/bin/bash"]
-#ENTRYPOINT [ "pipenv","shell"]
 ENTRYPOINT ["/bin/bash","./docker-entrypoint.sh"]

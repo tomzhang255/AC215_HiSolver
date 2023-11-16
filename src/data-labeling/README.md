@@ -8,13 +8,11 @@ Make sure you've followed all the steps from the data pre-processing section `sr
 
 1. Start a Docker daemon (i.e., open up Docker Desktop)
 
-2. Copy the `secrets` folder from `src/preprocessing/secrets/` and paste it to `src/data-labeling/secrets`
+2. Traverse to the correct directory: `src/data-labeling/`
 
-3. Traverse to the correct directory: `src/data-labeling/`
+3. Create an env file named `data-labeling.env` within the `secrets/` folder; make sure it lives here: `secrets/data-labeling.env`
 
-4. Create an env file named `data-labeling.env` within the `secrets/` folder; make sure it lives here: `src/data-labeling/secrets/data-labeling.env`
-
-5. Paste the following content into the env file, replacing the appropriate parts with real info. Note: GCP project name can be found on the GCP Console; your bucket name is in `secrets/gcs_bucket_name.txt`; you may use any username (but preferrably your harvard email) and password you'd like for Label Studio.
+4. Paste the following content into the env file, replacing the appropriate parts with real info. Note: GCP project name can be found on the GCP Console; your bucket name is in `secrets/gcs_bucket_name.txt`; you may use any username (but preferrably your harvard email) and password you'd like for Label Studio.
 
 ```shell
 GCP_PROJECT=your_gcp_project_name
@@ -23,20 +21,9 @@ LABEL_STUDIO_USERNAME=your_harvard_email
 LABEL_STUDIO_PASSWORD=any_password
 ```
 
-6. Run containers:
+5. Run containers: `./docker-shell.sh`
 
-```shell
-# Create the network if we don't have it yet
-docker network inspect hisolver-data-labeling-network >/dev/null 2>&1 || docker network create hisolver-data-labeling-network
-
-# Build the image based on the Dockerfile
-docker build -t hisolver-data-label-cli --platform=linux/arm64/v8 -f Dockerfile .
-
-# Run All Containers
-docker-compose run --rm --service-ports hisolver-data-label-cli
-```
-
-7. This should bring up a shell prompt from the running container
+6. This should bring up a shell prompt from the running container
 
 ## III. Set up Label Studio
 
