@@ -61,6 +61,30 @@
             │     ├── Pipfile.lock
             │     ├── custom_handler.py
             │     └── deploy.py
+            └── api-service
+            │     ├── README.md
+            │     ├── Dockerfile
+            │     ├── docker-entrypoint.sh
+            │     ├── docker-shell.sh
+            │     ├── Pipfile
+            │     ├── Pipfile.lock
+            │     └── api/
+            └── frontend
+            │     ├── README.md
+            │     ├── Dockerfile
+            │     ├── docker-shell.sh
+            │     └── index.html
+            └── deploy-app
+            │     ├── README.md
+            │     ├── Dockerfile
+            │     ├── docker-entrypoint.sh
+            │     ├── docker-shell.sh
+            │     ├── deploy-docker-images.yml
+            │     ├── deploy-create-instance.yml
+            │     ├── deploy-provision-instance.yml
+            │     ├── deploy-setup-containers.yml
+            │     ├── deploy-setup-webserver.yml
+            │     └── inventory.yml
 
 ---
 
@@ -156,3 +180,25 @@ The figures below exhibit the execution of the two pipelines on Vertex AI.
 ![Pipeline 1](./assets/images/pipeline1.png)
 
 ![Pipeline 2](./assets/images/pipeline2.png)
+
+## Design Decisions
+
+This is our solution architecture diagram:
+
+![Solution architecture](./assets/images/solution-architecture.png)
+
+In particular, these are the processed that will be performed by stakeholders: Developers develop app; data scientists fine-tune LLM; end users use app by inputting prompts and receiving a high quality animation rendered by Manim code.
+
+To execute these processes, the following components will be used: a data pipeline to automate relevant ML workflows; a web app frontend that provides a user-friendly interface for the end user; an API backend that interprets interactions from the frontend then communicates with the finalized model deployed by the ML workflow.
+
+Furthermore, these are the elements of the state during the lifecycle of the app: Source control to store/version code; container registry for docker images; image store for data; models and model artifacts store.
+
+This is our technical architecture diagram:
+
+![Technical architecture](./assets/images/technical-architecture.png)
+
+In particular, we use a GCS bucket to store all data (raw and processed) as well as model artifacts. Vertex AI is used to automate the ML workflow, which involved data collection by scraping GitHub, data pre-processing by parsing Python files; and along the way, we pause the pipeline to manually label data using Label Studio. After that, we continue the pipeline by fine-tuning a pre-trained LLM, then deploy the model to Vertex AI. Both the backend and frontend are hosted on a Google Cloud Compute Engine instance.
+
+The backend is a FastAPI app with one endpoint that receives user input (prompt), then sends it to the model endpoint on Vertex AI. The Vertex AI model endpoint then returns a code snippet, which is then rendered by Manim. And because it is good practice to have redundancies, we also have a backup option in case the Vertex AI model endpoint is down. In that case, we would make an API call to ChatGPT-4. This way, we can ensure that the end user always receives a response. The job of the backend is to get a response which is Manim package Python code; then the FastAPI renders it into an animation.
+
+The frontend is a simple dashboard with a text input field for prompts. After the user submits it, the animation rendered by the backend is displayed on the page.
