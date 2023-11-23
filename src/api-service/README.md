@@ -1,6 +1,6 @@
 # HiSolver API
 
-This repo uses Docker, FastAPI, and Python to create an API for managing and creating animations using language model-based search and question answering. It utilizes OpenAI's language model for document embeddings and ChromaDB for vector indexing and searching.
+This repo uses Docker, FastAPI, and Python to create an API for managing and creating animations using language model-based search and question answering. It utilizes our custom Vertex AI model, with a fallback to OpenAI's language model rendering Manim animations for simple 2D function plotting.
 
 ## Table of Contents
 - [HiSolver API](#hisolver-api)
