@@ -199,6 +199,20 @@ This is our technical architecture diagram:
 
 In particular, we use a GCS bucket to store all data (raw and processed) as well as model artifacts. Vertex AI is used to automate the ML workflow, which involved data collection by scraping GitHub, data pre-processing by parsing Python files; and along the way, we pause the pipeline to manually label data using Label Studio. After that, we continue the pipeline by fine-tuning a pre-trained LLM, then deploy the model to Vertex AI. Both the backend and frontend are hosted on a Google Cloud Compute Engine instance.
 
+This is our backend API's Swagger Documentation:
+
+![Swagger Documentation](./assets/images/swagger.jpeg)
+
 The backend is a FastAPI app with one endpoint that receives user input (prompt), then sends it to the model endpoint on Vertex AI. The Vertex AI model endpoint then returns a code snippet, which is then rendered by Manim. And because it is good practice to have redundancies, we also have a backup option in case the Vertex AI model endpoint is down. In that case, we would make an API call to ChatGPT-4. This way, we can ensure that the end user always receives a response. The job of the backend is to get a response which is Manim package Python code; then the FastAPI renders it into an animation.
 
 The frontend is a simple dashboard with a text input field for prompts. After the user submits it, the animation rendered by the backend is displayed on the page.
+
+The following is a demo of how to use our frontend.
+
+![Demo1](./assets/gif/demo1.gif)
+
+![Demo2](./assets/gif/demo2.gif)
+
+Note that what we've submitted here is only a simple prototype app. The final app with all the functionalities is deployed on [hisolver.com](hisolver.com) with our latest model integrated. Feel free to check it out!
+
+![hisolver homepage](./assets/images/hisolver-home.jpeg)
