@@ -203,9 +203,9 @@ This is our backend API's Swagger Documentation:
 
 ![Swagger Documentation](./assets/images/swagger.jpeg)
 
-The backend is a FastAPI app with one endpoint that receives user input (prompt), then sends it to the model endpoint on Vertex AI. The Vertex AI model endpoint then returns a code snippet, which is then rendered by Manim. And because it is good practice to have redundancies, we also have a backup option in case the Vertex AI model endpoint is down. In that case, we would make an API call to ChatGPT-4. This way, we can ensure that the end user always receives a response. The job of the backend is to get a response which is Manim package Python code; then the FastAPI renders it into an animation.
+The backend is a FastAPI app properly dockerized with one endpoint that receives user input (prompt), then sends it to the model endpoint on Vertex AI. The Vertex AI model endpoint then returns a code snippet, which is then rendered by Manim. And because it is good practice to have redundancies, we also have a backup option in case the Vertex AI model endpoint is down. In that case, we would make an API call to ChatGPT-4. This way, we can ensure that the end user always receives a response. The job of the backend is to get a response which is Manim package Python code; then the FastAPI renders it into an animation.
 
-The frontend is a simple dashboard with a text input field for prompts. After the user submits it, the animation rendered by the backend is displayed on the page.
+The frontend is a simple dashboard built with React with a text input field for prompts. After the user submits it, the animation rendered by the backend is displayed on the page.
 
 The app is hosted on a Compute Engine VM instance:
 
