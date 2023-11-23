@@ -213,6 +213,8 @@ The app is hosted on a Compute Engine VM instance:
 
 And the entire deployment process was automated with Ansible.
 
+The api-service and frontend folders contain instructions on how to run the code.
+
 The following is a demo of how to use our frontend.
 
 ![Demo1](./assets/gif/demo1.gif)
