@@ -207,6 +207,12 @@ The backend is a FastAPI app with one endpoint that receives user input (prompt)
 
 The frontend is a simple dashboard with a text input field for prompts. After the user submits it, the animation rendered by the backend is displayed on the page.
 
+The app is hosted on a Compute Engine VM instance:
+
+![vm instance](./assets/images/vm-instance.png)
+
+And the entire deployment process was automated with Ansible.
+
 The following is a demo of how to use our frontend.
 
 ![Demo1](./assets/gif/demo1.gif)
