@@ -1,0 +1,22 @@
+all:
+  vars:
+    ansible_user: sa_108653200632982433693
+    ansible_ssh_private_key_file: "../../secrets/ssh-key-deployment"
+    gcp_service_account_file: "../../secrets/data-service-account.json"
+    gcp_service_account_email: "hisolver-data-collection@tom-zhang-0.iam.gserviceaccount.com"
+    gcp_auth_kind: "serviceaccount"
+    gcp_scopes: "https://www.googleapis.com/auth/compute"
+    gcp_project: "tom-zhang-0"
+    gcp_region: "us-east1"
+    gcp_zone: "us-east1-b"
+    docker_network_name: "appnetwork"
+    persistent_disk_name: "hisolver-manim-app-disk"
+    persistent_disk_size: 50
+    machine_instance_name: "hisolver-manim-app"
+    machine_type: "n2d-standard-2"
+    machine_disk_size: 50
+
+  children:
+    appserver:
+      hosts:
+        34.73.213.53:

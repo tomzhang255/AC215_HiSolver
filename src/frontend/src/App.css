@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.App {
+  font-family: sans-serif;
+  text-align: center;
+  background: #212121;
+}
+
+.formula-container {
+  background: black;
+  padding: 20px;
+  margin: 20px;
+  display: inline-block;
+}
+
+.formula-image {
+  max-width: 100%;
+  height: auto;
+}
+
+.animation-container {
+  position: relative;
+  margin: 20px;
+  display: inline-block;
+}
+
+.animation-preview {
+  width: 300px; /* Adjust based on your actual content size */
+  height: 200px;
+  background: #ccc; /* Placeholder for the video content area */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.play-icon {
+  width: 50px;
+  height: 50px;
+}
+
+.animate-action {
+  margin-top: 20px;
+}
+
+.animate-input {
+  padding: 10px;
+  margin-right: 10px;
+  width: 300px;
+}
+
+.animate-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* Add responsive design as needed */
+
+
+/* Adding a purple toolbar on top */
+.toolbar {
+  background-color: #6b46c104; /* Tailwind purple-700 */
+  width: 100%;
+  padding: 10px 0;
+  text-align: center;
+  color: black;
+}
+
+.bg-dark {
+  background-color: #424242;
+}
+
+.bg-darker {
+  background-color: #212121;
+}
+
+
+
