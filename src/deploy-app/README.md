@@ -1,5 +1,7 @@
 # Deploy App to GCP
 
+## I. Prep
+
 1. grant permissions to the service account you've been using in the IAM tab of GCP console:
 
 - Compute Admin
@@ -52,7 +54,9 @@ Note the field "username" in the output of the command above; this is your ansib
 ansible-playbook deploy-docker-images.yml -i inventory.yml
 ```
 
-8. Create Compute Instance (VM) Server in GCP
+## II. Without Kubernetes
+
+1. Create Compute Instance (VM) Server in GCP
 
 ```shell
 ansible-playbook deploy-create-instance.yml -i inventory.yml --extra-vars cluster_state=present
@@ -60,7 +64,7 @@ ansible-playbook deploy-create-instance.yml -i inventory.yml --extra-vars cluste
 
 Once the command runs successfully get the IP address of the compute instance from GCP Console (Compute Engine -> VM instances) and update the `appserver > hosts` in inventory.yml file
 
-9. Provision Compute Instance in GCP
+2. Provision Compute Instance in GCP
 
 Install and setup all the required things for deployment.
 
@@ -68,7 +72,7 @@ Install and setup all the required things for deployment.
 ansible-playbook deploy-provision-instance.yml -i inventory.yml
 ```
 
-10. Setup Docker Containers in the Compute Instance
+3. Setup Docker Containers in the Compute Instance
 
 ```shell
 ansible-playbook deploy-setup-containers.yml -i inventory.yml
@@ -87,7 +91,7 @@ To get into a container run:
 sudo docker exec -it api-service /bin/bash
 ```
 
-11. Setup Webserver on the Compute Instance
+4. Setup Webserver on the Compute Instance
 
 ```shell
 ansible-playbook deploy-setup-webserver.yml -i inventory.yml
@@ -95,8 +99,41 @@ ansible-playbook deploy-setup-webserver.yml -i inventory.yml
 
 Once the command runs go to `http://<External IP>/`
 
-12. [Optional] Delete the Compute Instance / Persistent disk
+5. [Optional] Delete the Compute Instance / Persistent disk
 
 ```shell
 ansible-playbook deploy-create-instance.yml -i inventory.yml --extra-vars cluster_state=absent
+```
+
+## III. With Kubernetes
+
+1. Enable these API's on GCP console
+
+- Compute Engine API
+- Service Usage API
+- Cloud Resource Manager API
+- Google Container Registry API
+- Kubernetes Engine API
+
+2. Follow all the steps in **I. Prep**
+
+3. Edit GCS_BUCKET_NAME field in deploy-k8s-cluster.yml to match the bucket name you've been using
+
+4. Create & deploy cluster
+
+```shell
+ansible-playbook deploy-k8s-cluster.yml -i inventory.yml --extra-vars cluster_state=present
+```
+
+5. View the app:
+
+- Copy the nginx_ingress_ip from the terminal from the create cluster command
+- Go to http://<YOUR INGRESS IP>.sslip.io
+
+6. [Optional] Manage on GCP console: Kubernetes Engine -> Clusters
+
+7. [Optional] Delete the cluster
+
+```shell
+ansible-playbook deploy-k8s-cluster.yml -i inventory.yml --extra-vars cluster_state=absent
 ```

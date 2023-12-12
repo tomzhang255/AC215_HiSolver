@@ -7,7 +7,7 @@ tiktoken
 chromadb
 python-multipart
 scikit-learn
-fastapi-async-langchain
+# fastapi-async-langchain
 anthropic
 promptlayer
 manim

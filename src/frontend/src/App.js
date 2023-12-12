@@ -28,6 +28,7 @@ export default function App() {
   };
 
   const handleSend = () => {
+    alert('Please wait while we fetch your animation.')
     if (userInput.trim()) {
       fetchAnimation();
     }

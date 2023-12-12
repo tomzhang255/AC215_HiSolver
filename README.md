@@ -207,15 +207,33 @@ The backend is a FastAPI app properly dockerized with one endpoint that receives
 
 The frontend is a simple dashboard built with React with a text input field for prompts. After the user submits it, the animation rendered by the backend is displayed on the page.
 
-The app is hosted on a Compute Engine VM instance:
+## App Deployment
 
-![vm instance](./assets/images/vm-instance.png)
+The app is hosted on a Google Kubernetes Engine (GKE) cluster:
+
+![gke cluster](./assets/images/gke-cluster.png)
 
 And the entire deployment process was automated with Ansible.
 
 The api-service and frontend folders contain instructions on how to run the code.
 
-The following is a demo of how to use our frontend.
+## Kubernetes Cluster Configuration Report
+
+Our Kubernetes cluster, deployed on Google Kubernetes Engine (GKE), is meticulously configured to support a React application comprising both frontend and backend components. The cluster, named "hisolver-manim-app-cluster," is initialized with two nodes of the type "n2d-standard-2," each equipped with 30 GB of disk space. This setup offers a balanced combination of computational power and storage, essential for our application's performance requirements.
+
+The cluster's node pool features autoscaling capabilities, ensuring efficient resource utilization by dynamically adjusting the number of nodes based on demand, with a range set from one to the initial node count. Each node is configured with a series of OAuth scopes, enabling appropriate access to other Google Cloud services. To enhance reliability and minimize downtime, both auto-repair and auto-upgrade functionalities are enabled, ensuring that the nodes are always up-to-date and functioning correctly.
+
+In terms of Kubernetes-specific configurations, we have established a dedicated namespace, "hisolver-manim-app-cluster-namespace," to isolate our application deployments within the cluster. This approach aids in resource management and access control. Additionally, the setup includes a Persistent Volume Claim (PVC) with 5Gi of storage in a ReadWriteOnce mode, catering to persistent storage needs.
+
+The ingress setup is handled by the nginx-ingress controller, deployed using Helm, which provides efficient traffic routing and load balancing for our services. It's configured with SSL-redirect disabled and custom rewrite rules, ensuring seamless access to our frontend and API services. The services themselves are exposed via NodePort, with the frontend running on port 80 and the API service on port 8001.
+
+Security and configuration management are addressed through Kubernetes secrets. We securely import GCP service account credentials as a Kubernetes secret, which is then utilized by the API service deployment. This setup not only centralizes credential management but also enhances the overall security posture of our application infrastructure.
+
+This Kubernetes configuration represents a robust, scalable, and efficient environment for hosting our React application, ensuring high availability, security, and optimal performance.
+
+## Demo
+
+The following is a demo of how to use our app.
 
 ![Demo1](./assets/gif/demo1.gif)
 
