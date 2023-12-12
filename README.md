@@ -197,7 +197,7 @@ This is our technical architecture diagram:
 
 ![Technical architecture](./assets/images/technical-architecture.png)
 
-In particular, we use a GCS bucket to store all data (raw and processed) as well as model artifacts. Vertex AI is used to automate the ML workflow, which involved data collection by scraping GitHub, data pre-processing by parsing Python files; and along the way, we pause the pipeline to manually label data using Label Studio. After that, we continue the pipeline by fine-tuning a pre-trained LLM, then deploy the model to Vertex AI. Both the backend and frontend are hosted on a Google Cloud Compute Engine instance.
+In particular, we use a GCS bucket to store all data (raw and processed) as well as model artifacts. Vertex AI is used to automate the ML workflow, which involved data collection by scraping GitHub, data pre-processing by parsing Python files; and along the way, we pause the pipeline to manually label data using Label Studio. After that, we continue the pipeline by fine-tuning a pre-trained LLM, then deploy the model to Vertex AI. Both the backend and frontend are hosted on a Google Kubernetes Engine (GKE) cluster.
 
 This is our backend API's Swagger Documentation:
 
