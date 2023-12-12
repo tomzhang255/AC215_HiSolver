@@ -84,6 +84,7 @@
             │     ├── deploy-provision-instance.yml
             │     ├── deploy-setup-containers.yml
             │     ├── deploy-setup-webserver.yml
+            │     ├── deploy-k8s-cluster.yml
             │     └── inventory.yml
 
 ---
@@ -215,7 +216,9 @@ The app is hosted on a Google Kubernetes Engine (GKE) cluster:
 
 And the entire deployment process was automated with Ansible.
 
-The api-service and frontend folders contain instructions on how to run the code.
+Refer to `src/deploy-app/README.md` for an in-depth description of the app deployment procedure.
+
+The directories `src/api-service` and `src/frontend` contain the code for the backend and frontend respectively.
 
 ## Kubernetes Cluster Configuration Report
 
